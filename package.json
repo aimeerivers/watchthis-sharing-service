@@ -1,22 +1,24 @@
 {
-  "name": "express-server-template",
+  "name": "watchthis-sharing-service",
   "version": "0.0.1",
-  "description": "A template for a new express server project",
+  "description": "Sharing service for WatchThis - handles media sharing between users",
   "keywords": [
-    "express",
-    "server",
-    "template"
+    "watchthis",
+    "sharing",
+    "media",
+    "social",
+    "microservice"
   ],
-  "homepage": "https://github.com/aimeerivers/express-server-template#readme",
+  "homepage": "https://github.com/aimeerivers/watchthis-sharing-service#readme",
   "bugs": {
-    "url": "https://github.com/aimeerivers/express-server-template/issues"
+    "url": "https://github.com/aimeerivers/watchthis-sharing-service/issues"
   },
   "license": "ISC",
   "author": "aimee rivers",
   "main": "dist/src/server.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aimeerivers/express-server-template.git"
+    "url": "git+https://github.com/aimeerivers/watchthis-sharing-service.git"
   },
   "type": "module",
   "scripts": {
@@ -39,6 +41,8 @@
     "app-root-path": "3.1.0",
     "dotenv": "16.6.1",
     "express": "5.1.0",
+    "helmet": "8.1.0",
+    "mongoose": "8.17.2",
     "pug": "3.0.3"
   },
   "devDependencies": {
