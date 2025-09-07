@@ -64,6 +64,153 @@ export function mountApi(mountRoute: string, app: Express): void {
     })
   );
 
+  // Get shares sent by user - MUST be before /:id route
+  app.get(
+    mountRoute + "/shares/sent",
+    asyncHandler(async (req: Request, res: Response) => {
+      // TODO: Get userId from authenticated session
+      const { userId } = req.query;
+
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: "MISSING_USER_ID",
+            message: "userId is required",
+          },
+        });
+      }
+
+      const { status, page = 1, limit = 20 } = req.query;
+      const skip = (Number(page) - 1) * Number(limit);
+
+      const filter: any = { fromUserId: userId };
+      if (status && status !== "all") {
+        filter.status = status;
+      }
+
+      const shares = await Share.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit));
+
+      const total = await Share.countDocuments(filter);
+
+      res.json({
+        success: true,
+        data: shares.map((share) => share.toJSON()),
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total,
+          hasNext: skip + shares.length < total,
+        },
+      });
+    })
+  );
+
+  // Get shares received by user - MUST be before /:id route
+  app.get(
+    mountRoute + "/shares/received",
+    asyncHandler(async (req: Request, res: Response) => {
+      // TODO: Get userId from authenticated session
+      const { userId } = req.query;
+
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: "MISSING_USER_ID",
+            message: "userId is required",
+          },
+        });
+      }
+
+      const { status, page = 1, limit = 20 } = req.query;
+      const skip = (Number(page) - 1) * Number(limit);
+
+      const filter: any = { toUserId: userId };
+      if (status && status !== "all") {
+        filter.status = status;
+      }
+
+      const shares = await Share.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit));
+
+      const total = await Share.countDocuments(filter);
+
+      res.json({
+        success: true,
+        data: shares.map((share) => share.toJSON()),
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total,
+          hasNext: skip + shares.length < total,
+        },
+      });
+    })
+  );
+
+  // Get sharing statistics for user - MUST be before /:id route
+  app.get(
+    mountRoute + "/shares/stats",
+    asyncHandler(async (req: Request, res: Response) => {
+      // TODO: Get userId from authenticated session
+      const { userId } = req.query;
+
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: "MISSING_USER_ID",
+            message: "userId is required",
+          },
+        });
+      }
+
+      const [sentStats, receivedStats] = await Promise.all([
+        Share.aggregate([
+          { $match: { fromUserId: new mongoose.Types.ObjectId(userId as string) } },
+          {
+            $group: {
+              _id: "$status",
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+        Share.aggregate([
+          { $match: { toUserId: new mongoose.Types.ObjectId(userId as string) } },
+          {
+            $group: {
+              _id: "$status",
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+      ]);
+
+      const formatStats = (stats: any[]) => {
+        const result = { pending: 0, watched: 0, archived: 0, total: 0 };
+        stats.forEach((stat) => {
+          result[stat._id as keyof typeof result] = stat.count;
+          result.total += stat.count;
+        });
+        return result;
+      };
+
+      res.json({
+        success: true,
+        data: {
+          sent: formatStats(sentStats),
+          received: formatStats(receivedStats),
+        },
+      });
+    })
+  );
+
   // Get share by ID
   app.get(
     mountRoute + "/shares/:id",
@@ -195,150 +342,5 @@ export function mountApi(mountRoute: string, app: Express): void {
     })
   );
 
-  // Get shares sent by user
-  app.get(
-    mountRoute + "/shares/sent",
-    asyncHandler(async (req: Request, res: Response) => {
-      // TODO: Get userId from authenticated session
-      const { userId } = req.query;
 
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: {
-            code: "MISSING_USER_ID",
-            message: "userId is required",
-          },
-        });
-      }
-
-      const { status, page = 1, limit = 20 } = req.query;
-      const skip = (Number(page) - 1) * Number(limit);
-
-      const filter: any = { fromUserId: userId };
-      if (status && status !== "all") {
-        filter.status = status;
-      }
-
-      const shares = await Share.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(Number(limit));
-
-      const total = await Share.countDocuments(filter);
-
-      res.json({
-        success: true,
-        data: shares.map((share) => share.toJSON()),
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          hasNext: skip + shares.length < total,
-        },
-      });
-    })
-  );
-
-  // Get shares received by user
-  app.get(
-    mountRoute + "/shares/received",
-    asyncHandler(async (req: Request, res: Response) => {
-      // TODO: Get userId from authenticated session
-      const { userId } = req.query;
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: {
-            code: "MISSING_USER_ID",
-            message: "userId is required",
-          },
-        });
-      }
-
-      const { status, page = 1, limit = 20 } = req.query;
-      const skip = (Number(page) - 1) * Number(limit);
-
-      const filter: any = { toUserId: userId };
-      if (status && status !== "all") {
-        filter.status = status;
-      }
-
-      const shares = await Share.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(Number(limit));
-
-      const total = await Share.countDocuments(filter);
-
-      res.json({
-        success: true,
-        data: shares.map((share) => share.toJSON()),
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          hasNext: skip + shares.length < total,
-        },
-      });
-    })
-  );
-
-  // Get sharing statistics for user
-  app.get(
-    mountRoute + "/shares/stats",
-    asyncHandler(async (req: Request, res: Response) => {
-      // TODO: Get userId from authenticated session
-      const { userId } = req.query;
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: {
-            code: "MISSING_USER_ID",
-            message: "userId is required",
-          },
-        });
-      }
-
-      const [sentStats, receivedStats] = await Promise.all([
-        Share.aggregate([
-          { $match: { fromUserId: new mongoose.Types.ObjectId(userId as string) } },
-          {
-            $group: {
-              _id: "$status",
-              count: { $sum: 1 },
-            },
-          },
-        ]),
-        Share.aggregate([
-          { $match: { toUserId: new mongoose.Types.ObjectId(userId as string) } },
-          {
-            $group: {
-              _id: "$status",
-              count: { $sum: 1 },
-            },
-          },
-        ]),
-      ]);
-
-      const formatStats = (stats: any[]) => {
-        const result = { pending: 0, watched: 0, archived: 0, total: 0 };
-        stats.forEach((stat) => {
-          result[stat._id as keyof typeof result] = stat.count;
-          result.total += stat.count;
-        });
-        return result;
-      };
-
-      res.json({
-        success: true,
-        data: {
-          sent: formatStats(sentStats),
-          received: formatStats(receivedStats),
-        },
-      });
-    })
-  );
 }
