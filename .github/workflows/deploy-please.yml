@@ -1,0 +1,38 @@
+name: Deploy please
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  deploy-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add Scalingo SSH key to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ssh.osc-fr1.scalingo.com >> ~/.ssh/known_hosts
+
+      - name: Add Scalingo SSH private key
+        run: |
+          echo "${{ secrets.SCALINGO_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Push to Scalingo
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_PLEASE_TOKEN }}
+          REMOTE_URL: ${{ vars.SCALINGO_GIT_URL }}
+        run: |
+          git remote add scalingo $REMOTE_URL
+          git push scalingo HEAD:refs/heads/main

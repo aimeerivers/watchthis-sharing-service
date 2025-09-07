@@ -1,0 +1,63 @@
+{
+  "name": "express-server-template",
+  "version": "0.0.1",
+  "description": "A template for a new express server project",
+  "keywords": [
+    "express",
+    "server",
+    "template"
+  ],
+  "homepage": "https://github.com/aimeerivers/express-server-template#readme",
+  "bugs": {
+    "url": "https://github.com/aimeerivers/express-server-template/issues"
+  },
+  "license": "ISC",
+  "author": "aimee rivers",
+  "main": "dist/src/server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aimeerivers/express-server-template.git"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "dev": "concurrently \"npm run build:watch\" \"npm run start:watch\" \"npm run tailwind:css:watch\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint --fix",
+    "lint:check": "eslint",
+    "package:lint": "npx npm-package-json-lint .",
+    "start": "node dist/src/server.js",
+    "start:watch": "nodemon dist/src/server.js",
+    "tailwind:css": "postcss src/styles/style.css -o public/styles/style.css",
+    "tailwind:css:watch": "postcss src/styles/style.css -o public/styles/style.css --watch --verbose",
+    "test": "NODE_ENV=test node --test dist/test/*.test.js"
+  },
+  "dependencies": {
+    "app-root-path": "3.1.0",
+    "dotenv": "16.6.1",
+    "express": "5.1.0",
+    "pug": "3.0.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "0.5.10",
+    "@tailwindcss/postcss": "4.1.13",
+    "@tailwindcss/typography": "0.5.16",
+    "@types/express": "5.0.3",
+    "@types/node": "22.17.2",
+    "@types/supertest": "6.0.3",
+    "autoprefixer": "10.4.21",
+    "concurrently": "9.2.0",
+    "eslint-config-plus-prettier": "4.1.15",
+    "nodemon": "3.1.10",
+    "postcss": "8.5.6",
+    "postcss-cli": "11.0.1",
+    "postcss-minify": "1.2.0",
+    "supertest": "7.1.4",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.9.2"
+  },
+  "prettier": "eslint-config-plus-prettier/prettier"
+}
