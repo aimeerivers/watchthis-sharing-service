@@ -1,5 +1,6 @@
-import type { Request, Response, Express } from "express";
+import type { Express, Request, Response } from "express";
 import mongoose from "mongoose";
+
 import { Share } from "./models/share.js";
 import { asyncHandler } from "./utils/asyncHandler.js";
 
@@ -89,10 +90,7 @@ export function mountApi(mountRoute: string, app: Express): void {
         filter.status = status;
       }
 
-      const shares = await Share.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(Number(limit));
+      const shares = await Share.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit));
 
       const total = await Share.countDocuments(filter);
 
@@ -134,10 +132,7 @@ export function mountApi(mountRoute: string, app: Express): void {
         filter.status = status;
       }
 
-      const shares = await Share.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(Number(limit));
+      const shares = await Share.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit));
 
       const total = await Share.countDocuments(filter);
 
@@ -341,6 +336,4 @@ export function mountApi(mountRoute: string, app: Express): void {
       });
     })
   );
-
-
 }

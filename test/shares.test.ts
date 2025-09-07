@@ -24,14 +24,14 @@ const testData = {
 describe("WatchThis Sharing Service - CRUD API", () => {
   before(async () => {
     server = app.listen(port);
-    
+
     // Wait for database connection to be ready
     if (mongoose.connection.readyState !== 1) {
       await new Promise((resolve) => {
         mongoose.connection.once("connected", resolve);
       });
     }
-    
+
     // Clean up any existing test data
     await Share.deleteMany({});
   });
@@ -45,10 +45,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         message: testData.validMessage,
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .send(shareData)
-        .expect(201);
+      const res = await request(app).post("/api/v1/shares").send(shareData).expect(201);
 
       assert.equal(res.body.success, true);
       assert.ok(res.body.data);
@@ -69,10 +66,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         toUserId: testData.anotherUserId.toString(),
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .send(shareData)
-        .expect(201);
+      const res = await request(app).post("/api/v1/shares").send(shareData).expect(201);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.message, undefined);
@@ -84,10 +78,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         toUserId: testData.validToUserId.toString(),
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .send(shareData)
-        .expect(400);
+      const res = await request(app).post("/api/v1/shares").send(shareData).expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "MISSING_FIELDS");
@@ -99,10 +90,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         toUserId: testData.validToUserId.toString(),
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .send(shareData)
-        .expect(400);
+      const res = await request(app).post("/api/v1/shares").send(shareData).expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "MISSING_FIELDS");
@@ -114,10 +102,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         fromUserId: testData.validFromUserId.toString(),
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .send(shareData)
-        .expect(400);
+      const res = await request(app).post("/api/v1/shares").send(shareData).expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "MISSING_FIELDS");
@@ -130,10 +115,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         toUserId: testData.validFromUserId.toString(), // Same user
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .send(shareData)
-        .expect(400);
+      const res = await request(app).post("/api/v1/shares").send(shareData).expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "INVALID_SHARE");
@@ -147,10 +129,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         message: "  Trimmed message  ",
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .send(shareData)
-        .expect(201);
+      const res = await request(app).post("/api/v1/shares").send(shareData).expect(201);
 
       assert.equal(res.body.data.message, "Trimmed message");
     });
@@ -172,9 +151,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     });
 
     it("should get share by valid ID", async () => {
-      const res = await request(app)
-        .get(`/api/v1/shares/${testShareId}`)
-        .expect(200);
+      const res = await request(app).get(`/api/v1/shares/${testShareId}`).expect(200);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.id, testShareId);
@@ -183,9 +160,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     });
 
     it("should fail with invalid ID format", async () => {
-      const res = await request(app)
-        .get(`/api/v1/shares/${testData.invalidId}`)
-        .expect(400);
+      const res = await request(app).get(`/api/v1/shares/${testData.invalidId}`).expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "INVALID_ID");
@@ -193,9 +168,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail with non-existent ID", async () => {
       const nonExistentId = new mongoose.Types.ObjectId();
-      const res = await request(app)
-        .get(`/api/v1/shares/${nonExistentId}`)
-        .expect(404);
+      const res = await request(app).get(`/api/v1/shares/${nonExistentId}`).expect(404);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "SHARE_NOT_FOUND");
@@ -218,10 +191,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     });
 
     it("should mark share as watched", async () => {
-      const res = await request(app)
-        .patch(`/api/v1/shares/${testShareId}`)
-        .send({ status: "watched" })
-        .expect(200);
+      const res = await request(app).patch(`/api/v1/shares/${testShareId}`).send({ status: "watched" }).expect(200);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.status, "watched");
@@ -229,10 +199,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     });
 
     it("should mark share as archived", async () => {
-      const res = await request(app)
-        .patch(`/api/v1/shares/${testShareId}`)
-        .send({ status: "archived" })
-        .expect(200);
+      const res = await request(app).patch(`/api/v1/shares/${testShareId}`).send({ status: "archived" }).expect(200);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.status, "archived");
@@ -260,10 +227,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail with non-existent ID", async () => {
       const nonExistentId = new mongoose.Types.ObjectId();
-      const res = await request(app)
-        .patch(`/api/v1/shares/${nonExistentId}`)
-        .send({ status: "watched" })
-        .expect(404);
+      const res = await request(app).patch(`/api/v1/shares/${nonExistentId}`).send({ status: "watched" }).expect(404);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "SHARE_NOT_FOUND");
@@ -286,9 +250,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     });
 
     it("should delete share by valid ID", async () => {
-      const res = await request(app)
-        .delete(`/api/v1/shares/${testShareId}`)
-        .expect(200);
+      const res = await request(app).delete(`/api/v1/shares/${testShareId}`).expect(200);
 
       assert.equal(res.body.success, true);
       assert.ok(res.body.message);
@@ -299,9 +261,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     });
 
     it("should fail with invalid ID format", async () => {
-      const res = await request(app)
-        .delete(`/api/v1/shares/${testData.invalidId}`)
-        .expect(400);
+      const res = await request(app).delete(`/api/v1/shares/${testData.invalidId}`).expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "INVALID_ID");
@@ -309,9 +269,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail with non-existent ID", async () => {
       const nonExistentId = new mongoose.Types.ObjectId();
-      const res = await request(app)
-        .delete(`/api/v1/shares/${nonExistentId}`)
-        .expect(404);
+      const res = await request(app).delete(`/api/v1/shares/${nonExistentId}`).expect(404);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "SHARE_NOT_FOUND");
@@ -322,7 +280,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     before(async () => {
       // Clean up and create test data
       await Share.deleteMany({});
-      
+
       // Create shares from our test user
       await Share.create([
         {
@@ -364,9 +322,9 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should filter sent shares by status", async () => {
       const res = await request(app)
         .get("/api/v1/shares/sent")
-        .query({ 
+        .query({
           userId: testData.validFromUserId.toString(),
-          status: "pending"
+          status: "pending",
         })
         .expect(200);
 
@@ -378,10 +336,10 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should handle pagination", async () => {
       const res = await request(app)
         .get("/api/v1/shares/sent")
-        .query({ 
+        .query({
           userId: testData.validFromUserId.toString(),
           page: 1,
-          limit: 1
+          limit: 1,
         })
         .expect(200);
 
@@ -393,9 +351,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     });
 
     it("should fail when userId is missing", async () => {
-      const res = await request(app)
-        .get("/api/v1/shares/sent")
-        .expect(400);
+      const res = await request(app).get("/api/v1/shares/sent").expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "MISSING_USER_ID");
@@ -406,7 +362,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     before(async () => {
       // Clean up and create test data
       await Share.deleteMany({});
-      
+
       // Create shares received by our test user
       await Share.create([
         {
@@ -448,9 +404,9 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should filter received shares by status", async () => {
       const res = await request(app)
         .get("/api/v1/shares/received")
-        .query({ 
+        .query({
           userId: testData.validToUserId.toString(),
-          status: "pending"
+          status: "pending",
         })
         .expect(200);
 
@@ -460,9 +416,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     });
 
     it("should fail when userId is missing", async () => {
-      const res = await request(app)
-        .get("/api/v1/shares/received")
-        .expect(400);
+      const res = await request(app).get("/api/v1/shares/received").expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "MISSING_USER_ID");
@@ -473,7 +427,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     before(async () => {
       // Clean up and create test data
       await Share.deleteMany({});
-      
+
       // Create various shares for statistics
       await Share.create([
         // Sent by test user
@@ -520,13 +474,13 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       assert.equal(res.body.success, true);
       assert.ok(res.body.data.sent);
       assert.ok(res.body.data.received);
-      
+
       // Check sent stats
       assert.equal(res.body.data.sent.total, 3);
       assert.equal(res.body.data.sent.pending, 1);
       assert.equal(res.body.data.sent.watched, 1);
       assert.equal(res.body.data.sent.archived, 1);
-      
+
       // Check received stats
       assert.equal(res.body.data.received.total, 2);
       assert.equal(res.body.data.received.pending, 1);
@@ -535,9 +489,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     });
 
     it("should fail when userId is missing", async () => {
-      const res = await request(app)
-        .get("/api/v1/shares/stats")
-        .expect(400);
+      const res = await request(app).get("/api/v1/shares/stats").expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "MISSING_USER_ID");
@@ -550,7 +502,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         try {
           // Clean up test data
           await Share.deleteMany({});
-          
+
           // Close the MongoDB connection to allow the test process to exit cleanly
           await mongoose.connection.close();
           console.log("CRUD test cleanup completed");

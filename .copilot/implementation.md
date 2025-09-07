@@ -143,14 +143,14 @@ The `watchthis-sharing-service` is the core service that enables users to share 
 
 ```javascript
 // Performance indexes
-db.shares.createIndex({ "fromUserId": 1, "createdAt": -1 });
-db.shares.createIndex({ "toUserId": 1, "status": 1, "createdAt": -1 });
-db.shares.createIndex({ "mediaId": 1 });
-db.shares.createIndex({ "status": 1, "createdAt": -1 });
+db.shares.createIndex({ fromUserId: 1, createdAt: -1 });
+db.shares.createIndex({ toUserId: 1, status: 1, createdAt: -1 });
+db.shares.createIndex({ mediaId: 1 });
+db.shares.createIndex({ status: 1, createdAt: -1 });
 
 // Compound indexes for common queries
-db.shares.createIndex({ "toUserId": 1, "status": 1 });
-db.shares.createIndex({ "fromUserId": 1, "status": 1 });
+db.shares.createIndex({ toUserId: 1, status: 1 });
+db.shares.createIndex({ fromUserId: 1, status: 1 });
 ```
 
 ## API Specification

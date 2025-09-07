@@ -50,9 +50,9 @@ app.set("views", path.join(appRootPath.path, "views"));
 app.use(express.static(path.join(appRootPath.path, "public")));
 
 app.get("/", (_req, res) => {
-  res.render("welcome-page", { 
+  res.render("welcome-page", {
     serviceName: "WatchThis Sharing Service",
-    description: "Handles media sharing between users"
+    description: "Handles media sharing between users",
   });
 });
 

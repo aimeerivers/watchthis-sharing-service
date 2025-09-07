@@ -146,7 +146,7 @@ GET    /ping                    # Simple status check
 This service integrates with the WatchThis ecosystem:
 
 - **Authentication**: Validates users via watchthis-user-service
-- **Media Validation**: Verifies media items via watchthis-media-service  
+- **Media Validation**: Verifies media items via watchthis-media-service
 - **Event Publishing**: Publishes share events for inbox and notification services
 - **Health Monitoring**: Provides health checks for service discovery
 

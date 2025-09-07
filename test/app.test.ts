@@ -12,7 +12,7 @@ let server: Server;
 describe("WatchThis Sharing Service App", () => {
   before(async () => {
     server = app.listen(port);
-    
+
     // Wait for database connection to be ready
     if (mongoose.connection.readyState !== 1) {
       await new Promise((resolve) => {
