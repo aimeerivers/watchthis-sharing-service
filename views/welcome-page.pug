@@ -1,8 +1,24 @@
 extends _layout
 
 block head
-  title Express Server Template
+  title WatchThis Sharing Service
 
 block body
-  h2 Welcome!
-  p This is the welcome page for the Express Server Template.
+  h2= serviceName || "WatchThis Sharing Service"
+  p= description || "Handles media sharing between users in the WatchThis platform"
+  
+  .mt-4
+    h3 Service Status
+    p Status: 
+      span.text-green-600 Active
+    
+  .mt-4
+    h3 API Endpoints
+    ul.list-disc.list-inside
+      li POST /api/v1/shares - Create new share
+      li GET /api/v1/shares/:id - Get share details
+      li PATCH /api/v1/shares/:id - Update share status
+      li DELETE /api/v1/shares/:id - Delete share
+      li GET /api/v1/shares/sent - Get sent shares
+      li GET /api/v1/shares/received - Get received shares
+      li GET /api/v1/shares/stats - Get sharing statistics
