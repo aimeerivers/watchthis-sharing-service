@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "description": "Sharing service for WatchThis - handles media sharing between users",
   "keywords": [
-    "watchthis",
-    "sharing",
     "media",
+    "microservice",
+    "sharing",
     "social",
-    "microservice"
+    "watchthis"
   ],
   "homepage": "https://github.com/aimeerivers/watchthis-sharing-service#readme",
   "bugs": {
