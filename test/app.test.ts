@@ -21,6 +21,22 @@ describe("WatchThis Sharing Service App", () => {
     }
   });
 
+  after(async () => {
+    return new Promise<void>((resolve) => {
+      server.close(async () => {
+        try {
+          // Close the MongoDB connection to allow the test process to exit cleanly
+          await mongoose.connection.close();
+          console.log("Test cleanup completed");
+        } catch (error) {
+          console.error("Error during test cleanup:", error);
+        } finally {
+          resolve();
+        }
+      });
+    });
+  });
+
   describe("Home", () => {
     it("should show the sharing service home page", async () => {
       const res = await request(app).get("/");
@@ -50,22 +66,6 @@ describe("WatchThis Sharing Service App", () => {
         assert.equal(res.statusCode, 200);
         assert.equal(res.body.status, "OK");
         assert.equal(res.body.message, "Sharing API is running");
-      });
-    });
-  });
-
-  after(async () => {
-    return new Promise<void>((resolve) => {
-      server.close(async () => {
-        try {
-          // Close the MongoDB connection to allow the test process to exit cleanly
-          await mongoose.connection.close();
-          console.log("Test cleanup completed");
-        } catch (error) {
-          console.error("Error during test cleanup:", error);
-        } finally {
-          resolve();
-        }
       });
     });
   });

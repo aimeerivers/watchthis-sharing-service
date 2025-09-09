@@ -1,9 +1,9 @@
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 
 /**
  * Error handling middleware for the application
  */
-export const errorHandler = (err: Error, _req: Request, res: Response, _next: NextFunction): void => {
+export const errorHandler = (err: Error, _req: Request, res: Response): void => {
   console.error(err.stack);
 
   // Mongoose validation error

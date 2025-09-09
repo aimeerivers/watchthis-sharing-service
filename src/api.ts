@@ -1,6 +1,7 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Response } from "express";
 import mongoose from "mongoose";
 
+import { type RequestWithUser, requireAuth } from "./middleware/auth.js";
 import { Share } from "./models/share.js";
 import { asyncHandler } from "./utils/asyncHandler.js";
 
@@ -16,20 +17,20 @@ export function mountApi(mountRoute: string, app: Express): void {
   // Create new share
   app.post(
     mountRoute + "/shares",
-    asyncHandler(async (req: Request, res: Response) => {
+    requireAuth,
+    asyncHandler(async (req: RequestWithUser, res: Response) => {
       const { mediaId, toUserId, message } = req.body;
 
-      // TODO: Add authentication to get fromUserId from session
-      // For now, require it in the request body
-      const { fromUserId } = req.body;
+      // Get fromUserId from authenticated session
+      const fromUserId = req.user!._id;
 
       // Basic validation
-      if (!mediaId || !fromUserId || !toUserId) {
+      if (!mediaId || !toUserId) {
         return res.status(400).json({
           success: false,
           error: {
             code: "MISSING_FIELDS",
-            message: "mediaId, fromUserId, and toUserId are required",
+            message: "mediaId and toUserId are required",
           },
         });
       }
@@ -68,19 +69,10 @@ export function mountApi(mountRoute: string, app: Express): void {
   // Get shares sent by user - MUST be before /:id route
   app.get(
     mountRoute + "/shares/sent",
-    asyncHandler(async (req: Request, res: Response) => {
-      // TODO: Get userId from authenticated session
-      const { userId } = req.query;
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: {
-            code: "MISSING_USER_ID",
-            message: "userId is required",
-          },
-        });
-      }
+    requireAuth,
+    asyncHandler(async (req: RequestWithUser, res: Response) => {
+      // Get userId from authenticated session
+      const userId = req.user!._id;
 
       const { status, page = 1, limit = 20 } = req.query;
       const skip = (Number(page) - 1) * Number(limit);
@@ -110,19 +102,10 @@ export function mountApi(mountRoute: string, app: Express): void {
   // Get shares received by user - MUST be before /:id route
   app.get(
     mountRoute + "/shares/received",
-    asyncHandler(async (req: Request, res: Response) => {
-      // TODO: Get userId from authenticated session
-      const { userId } = req.query;
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: {
-            code: "MISSING_USER_ID",
-            message: "userId is required",
-          },
-        });
-      }
+    requireAuth,
+    asyncHandler(async (req: RequestWithUser, res: Response) => {
+      // Get userId from authenticated session
+      const userId = req.user!._id;
 
       const { status, page = 1, limit = 20 } = req.query;
       const skip = (Number(page) - 1) * Number(limit);
@@ -152,19 +135,10 @@ export function mountApi(mountRoute: string, app: Express): void {
   // Get sharing statistics for user - MUST be before /:id route
   app.get(
     mountRoute + "/shares/stats",
-    asyncHandler(async (req: Request, res: Response) => {
-      // TODO: Get userId from authenticated session
-      const { userId } = req.query;
-
-      if (!userId) {
-        return res.status(400).json({
-          success: false,
-          error: {
-            code: "MISSING_USER_ID",
-            message: "userId is required",
-          },
-        });
-      }
+    requireAuth,
+    asyncHandler(async (req: RequestWithUser, res: Response) => {
+      // Get userId from authenticated session
+      const userId = req.user!._id;
 
       const [sentStats, receivedStats] = await Promise.all([
         Share.aggregate([
@@ -209,8 +183,10 @@ export function mountApi(mountRoute: string, app: Express): void {
   // Get share by ID
   app.get(
     mountRoute + "/shares/:id",
-    asyncHandler(async (req: Request, res: Response) => {
+    requireAuth,
+    asyncHandler(async (req: RequestWithUser, res: Response) => {
       const { id } = req.params;
+      const userId = req.user!._id;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({
@@ -234,7 +210,16 @@ export function mountApi(mountRoute: string, app: Express): void {
         });
       }
 
-      // TODO: Check user permissions (only sender/receiver can view)
+      // Check user permissions (only sender/receiver can view)
+      if (share.fromUserId.toString() !== userId && share.toUserId.toString() !== userId) {
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: "You don't have permission to view this share",
+          },
+        });
+      }
 
       res.json({
         success: true,
@@ -246,9 +231,11 @@ export function mountApi(mountRoute: string, app: Express): void {
   // Update share (mainly for marking as watched)
   app.patch(
     mountRoute + "/shares/:id",
-    asyncHandler(async (req: Request, res: Response) => {
+    requireAuth,
+    asyncHandler(async (req: RequestWithUser, res: Response) => {
       const { id } = req.params;
       const { status } = req.body;
+      const userId = req.user!._id;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({
@@ -283,7 +270,26 @@ export function mountApi(mountRoute: string, app: Express): void {
         });
       }
 
-      // TODO: Check user permissions (only receiver can mark as watched)
+      // Check user permissions (only receiver can mark as watched, both can archive)
+      if (status === "watched" && share.toUserId.toString() !== userId) {
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: "Only the recipient can mark a share as watched",
+          },
+        });
+      }
+
+      if (status === "archived" && share.fromUserId.toString() !== userId && share.toUserId.toString() !== userId) {
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: "You don't have permission to modify this share",
+          },
+        });
+      }
 
       if (status) {
         share.status = status;
@@ -301,8 +307,10 @@ export function mountApi(mountRoute: string, app: Express): void {
   // Delete/archive share
   app.delete(
     mountRoute + "/shares/:id",
-    asyncHandler(async (req: Request, res: Response) => {
+    requireAuth,
+    asyncHandler(async (req: RequestWithUser, res: Response) => {
       const { id } = req.params;
+      const userId = req.user!._id;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({
@@ -326,7 +334,16 @@ export function mountApi(mountRoute: string, app: Express): void {
         });
       }
 
-      // TODO: Check user permissions (sender or receiver can delete)
+      // Check user permissions (sender or receiver can delete)
+      if (share.fromUserId.toString() !== userId && share.toUserId.toString() !== userId) {
+        return res.status(403).json({
+          success: false,
+          error: {
+            code: "FORBIDDEN",
+            message: "You don't have permission to delete this share",
+          },
+        });
+      }
 
       await Share.findByIdAndDelete(id);
 
