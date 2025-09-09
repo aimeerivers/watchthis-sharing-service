@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.0.0...v1.1.0) (2025-09-09)
+
+
+### Features
+
+* Apply proper user authentication ([#5](https://github.com/aimeerivers/watchthis-sharing-service/issues/5)) ([96ca2de](https://github.com/aimeerivers/watchthis-sharing-service/commit/96ca2de97eceb6291cd4f14d3455e21d4a6e906b))
+
+
+### Documentation
+
+* Update documentation with progress made so far ([#3](https://github.com/aimeerivers/watchthis-sharing-service/issues/3)) ([a04958c](https://github.com/aimeerivers/watchthis-sharing-service/commit/a04958cc438dcada80211a148aec792416b658a2))
+
 ## 1.0.0 (2025-09-07)
 
 
