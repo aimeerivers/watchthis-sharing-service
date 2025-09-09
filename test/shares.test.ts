@@ -606,23 +606,4 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       assert.equal(res.body.error.code, "AUTHENTICATION_REQUIRED");
     });
   });
-
-  after(async () => {
-    return new Promise<void>((resolve) => {
-      server.close(async () => {
-        try {
-          // Clean up test data
-          await Share.deleteMany({});
-
-          // Close the MongoDB connection to allow the test process to exit cleanly
-          await mongoose.connection.close();
-          console.log("CRUD test cleanup completed");
-        } catch (error) {
-          console.error("Error during CRUD test cleanup:", error);
-        } finally {
-          resolve();
-        }
-      });
-    });
-  });
 });
