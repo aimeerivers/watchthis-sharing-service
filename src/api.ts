@@ -1,7 +1,7 @@
 import type { Express, Response } from "express";
 import mongoose from "mongoose";
 
-import { requireAuth, type RequestWithUser } from "./middleware/auth.js";
+import { type RequestWithUser, requireAuth } from "./middleware/auth.js";
 import { Share } from "./models/share.js";
 import { asyncHandler } from "./utils/asyncHandler.js";
 

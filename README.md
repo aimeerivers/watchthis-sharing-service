@@ -7,7 +7,7 @@ Sharing service for WatchThis - handles media sharing between users.
 ✅ **Service structure initialized**  
 ✅ **Core sharing operations** (completed)  
 ✅ **Comprehensive test suite** (31 passing tests)  
-� **User integration** (in progress)  
+🚧 **User integration** (in progress)  
 📋 **Event publishing** (planned)
 
 ## Overview
@@ -18,7 +18,7 @@ The watchthis-sharing-service is responsible for:
 - ✅ Tracking share status (pending, watched, archived)
 - 🚧 Validating user permissions for sharing
 - ✅ Providing sharing history and analytics
-- � Generating share events for other services
+- 🚧 Generating share events for other services
 
 This service is part of the WatchThis microservice ecosystem and integrates with:
 

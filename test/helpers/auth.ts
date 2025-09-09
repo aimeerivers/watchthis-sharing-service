@@ -8,12 +8,12 @@ export const testUsers = {
     username: "testuser1",
   },
   user2: {
-    _id: "507f1f77bcf86cd799439012", 
+    _id: "507f1f77bcf86cd799439012",
     username: "testuser2",
   },
   user3: {
     _id: "507f1f77bcf86cd799439013",
-    username: "testuser3", 
+    username: "testuser3",
   },
 };
 
@@ -23,7 +23,7 @@ export const testUsers = {
  */
 export function mockUserServiceAuth(user: { _id: string; username: string }) {
   const userServiceUrl = process.env.USER_SERVICE_URL ?? "http://localhost:8583";
-  
+
   nock(userServiceUrl)
     .persist() // Keep the mock active for multiple requests
     .get("/api/v1/session")
@@ -40,11 +40,8 @@ export function mockUserServiceAuth(user: { _id: string; username: string }) {
  */
 export function mockUserServiceAuthFailure() {
   const userServiceUrl = process.env.USER_SERVICE_URL ?? "http://localhost:8583";
-  
-  nock(userServiceUrl)
-    .persist()
-    .get("/api/v1/session")
-    .reply(401, { error: "Not authenticated" });
+
+  nock(userServiceUrl).persist().get("/api/v1/session").reply(401, { error: "Not authenticated" });
 }
 
 /**

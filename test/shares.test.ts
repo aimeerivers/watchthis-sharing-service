@@ -41,7 +41,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
           if (mongoose.connection.readyState === 1) {
             await Share.deleteMany({});
           }
-          
+
           // Close the MongoDB connection to allow the test process to exit cleanly
           await mongoose.connection.close();
           console.log("CRUD test cleanup completed");
@@ -57,18 +57,14 @@ describe("WatchThis Sharing Service - CRUD API", () => {
   describe("POST /api/v1/shares - Create Share", () => {
     it("should create a new share with valid data", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const shareData = {
         mediaId: testData.validMediaId.toString(),
         toUserId: testData.validToUserId.toString(),
         message: testData.validMessage,
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .set("Cookie", auth.cookie)
-        .send(shareData)
-        .expect(201);
+      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(201);
 
       assert.equal(res.body.success, true);
       assert.ok(res.body.data);
@@ -84,17 +80,13 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should create a share without message", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const shareData = {
         mediaId: testData.validMediaId.toString(),
         toUserId: testData.anotherUserId.toString(),
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .set("Cookie", auth.cookie)
-        .send(shareData)
-        .expect(201);
+      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(201);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.message, undefined);
@@ -102,16 +94,12 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail when mediaId is missing", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const shareData = {
         toUserId: testData.validToUserId.toString(),
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .set("Cookie", auth.cookie)
-        .send(shareData)
-        .expect(400);
+      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "MISSING_FIELDS");
@@ -131,16 +119,12 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail when toUserId is missing", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const shareData = {
         mediaId: testData.validMediaId.toString(),
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .set("Cookie", auth.cookie)
-        .send(shareData)
-        .expect(400);
+      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "MISSING_FIELDS");
@@ -148,17 +132,13 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail when user tries to share with themselves", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const shareData = {
         mediaId: testData.validMediaId.toString(),
         toUserId: testUsers.user1._id, // Same as authenticated user
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .set("Cookie", auth.cookie)
-        .send(shareData)
-        .expect(400);
+      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "INVALID_SHARE");
@@ -166,18 +146,14 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should trim whitespace from message", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const shareData = {
         mediaId: testData.validMediaId.toString(),
         toUserId: testData.validToUserId.toString(),
         message: "  Trimmed message  ",
       };
 
-      const res = await request(app)
-        .post("/api/v1/shares")
-        .set("Cookie", auth.cookie)
-        .send(shareData)
-        .expect(201);
+      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(201);
 
       assert.equal(res.body.data.message, "Trimmed message");
     });
@@ -200,11 +176,8 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should get share by valid ID", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
-      const res = await request(app)
-        .get(`/api/v1/shares/${testShareId}`)
-        .set("Cookie", auth.cookie)
-        .expect(200);
+
+      const res = await request(app).get(`/api/v1/shares/${testShareId}`).set("Cookie", auth.cookie).expect(200);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.id, testShareId);
@@ -214,11 +187,8 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail with invalid ID format", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
-      const res = await request(app)
-        .get(`/api/v1/shares/${testData.invalidId}`)
-        .set("Cookie", auth.cookie)
-        .expect(400);
+
+      const res = await request(app).get(`/api/v1/shares/${testData.invalidId}`).set("Cookie", auth.cookie).expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "INVALID_ID");
@@ -227,11 +197,8 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should fail with non-existent ID", async () => {
       const auth = authenticateAs(testUsers.user1);
       const nonExistentId = new mongoose.Types.ObjectId();
-      
-      const res = await request(app)
-        .get(`/api/v1/shares/${nonExistentId}`)
-        .set("Cookie", auth.cookie)
-        .expect(404);
+
+      const res = await request(app).get(`/api/v1/shares/${nonExistentId}`).set("Cookie", auth.cookie).expect(404);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "SHARE_NOT_FOUND");
@@ -247,7 +214,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       const share = new Share({
         mediaId: testData.validMediaId,
         fromUserId: testUsers.user2._id, // user2 sends
-        toUserId: testUsers.user1._id,   // user1 receives
+        toUserId: testUsers.user1._id, // user1 receives
         message: "Test share for PATCH",
       });
       const savedShare = await share.save();
@@ -256,7 +223,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should mark share as watched", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const res = await request(app)
         .patch(`/api/v1/shares/${testShareId}`)
         .set("Cookie", auth.cookie)
@@ -270,7 +237,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should mark share as archived", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const res = await request(app)
         .patch(`/api/v1/shares/${testShareId}`)
         .set("Cookie", auth.cookie)
@@ -283,7 +250,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail with invalid status", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const res = await request(app)
         .patch(`/api/v1/shares/${testShareId}`)
         .set("Cookie", auth.cookie)
@@ -296,7 +263,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail with invalid ID format", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const res = await request(app)
         .patch(`/api/v1/shares/${testData.invalidId}`)
         .set("Cookie", auth.cookie)
@@ -310,7 +277,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should fail with non-existent ID", async () => {
       const auth = authenticateAs(testUsers.user1);
       const nonExistentId = new mongoose.Types.ObjectId();
-      
+
       const res = await request(app)
         .patch(`/api/v1/shares/${nonExistentId}`)
         .set("Cookie", auth.cookie)
@@ -339,11 +306,8 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should delete share by valid ID", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
-      const res = await request(app)
-        .delete(`/api/v1/shares/${testShareId}`)
-        .set("Cookie", auth.cookie)
-        .expect(200);
+
+      const res = await request(app).delete(`/api/v1/shares/${testShareId}`).set("Cookie", auth.cookie).expect(200);
 
       assert.equal(res.body.success, true);
       assert.ok(res.body.message);
@@ -355,7 +319,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail with invalid ID format", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const res = await request(app)
         .delete(`/api/v1/shares/${testData.invalidId}`)
         .set("Cookie", auth.cookie)
@@ -368,11 +332,8 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should fail with non-existent ID", async () => {
       const auth = authenticateAs(testUsers.user1);
       const nonExistentId = new mongoose.Types.ObjectId();
-      
-      const res = await request(app)
-        .delete(`/api/v1/shares/${nonExistentId}`)
-        .set("Cookie", auth.cookie)
-        .expect(404);
+
+      const res = await request(app).delete(`/api/v1/shares/${nonExistentId}`).set("Cookie", auth.cookie).expect(404);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "SHARE_NOT_FOUND");
@@ -412,11 +373,8 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should get all sent shares for user", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
-      const res = await request(app)
-        .get("/api/v1/shares/sent")
-        .set("Cookie", auth.cookie)
-        .expect(200);
+
+      const res = await request(app).get("/api/v1/shares/sent").set("Cookie", auth.cookie).expect(200);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.length, 2);
@@ -426,7 +384,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should filter sent shares by status", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const res = await request(app)
         .get("/api/v1/shares/sent")
         .set("Cookie", auth.cookie)
@@ -440,7 +398,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should handle pagination", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const res = await request(app)
         .get("/api/v1/shares/sent")
         .set("Cookie", auth.cookie)
@@ -498,11 +456,8 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should get all received shares for user", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
-      const res = await request(app)
-        .get("/api/v1/shares/received")
-        .set("Cookie", auth.cookie)
-        .expect(200);
+
+      const res = await request(app).get("/api/v1/shares/received").set("Cookie", auth.cookie).expect(200);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.length, 2);
@@ -512,7 +467,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should filter received shares by status", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
+
       const res = await request(app)
         .get("/api/v1/shares/received")
         .set("Cookie", auth.cookie)
@@ -576,11 +531,8 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should get sharing statistics for user", async () => {
       const auth = authenticateAs(testUsers.user1);
-      
-      const res = await request(app)
-        .get("/api/v1/shares/stats")
-        .set("Cookie", auth.cookie)
-        .expect(200);
+
+      const res = await request(app).get("/api/v1/shares/stats").set("Cookie", auth.cookie).expect(200);
 
       assert.equal(res.body.success, true);
       assert.ok(res.body.data.sent);

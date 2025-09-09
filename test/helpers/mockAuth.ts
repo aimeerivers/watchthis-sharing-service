@@ -1,4 +1,5 @@
 import type { NextFunction, Response } from "express";
+
 import type { RequestWithUser } from "../../src/middleware/auth.js";
 
 /**
