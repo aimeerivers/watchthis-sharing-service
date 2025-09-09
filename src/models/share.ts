@@ -64,6 +64,7 @@ ShareSchema.virtual("id").get(function () {
 ShareSchema.set("toJSON", {
   virtuals: true,
   transform: function (_doc, ret) {
+    // eslint-disable-next-line no-unused-vars
     const { _id, __v, ...cleanRet } = ret;
     return cleanRet;
   },
