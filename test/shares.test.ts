@@ -346,7 +346,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       await Share.deleteMany({});
 
       // Create shares from our test user
-      await Share.insertMany([
+      await Share.create([
         {
           mediaId: testData.validMediaId,
           fromUserId: testUsers.user1._id,
