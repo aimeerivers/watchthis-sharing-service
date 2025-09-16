@@ -123,11 +123,20 @@ GET    /api/v1/shares/stats     # Get sharing statistics
 
 ### Authentication ✅ FULLY IMPLEMENTED
 
-- **Session-based authentication**: All API endpoints require valid user sessions
-- **User service integration**: Validates sessions via `watchthis-user-service`
-- **Automatic user context**: User information extracted from session cookies
+- **JWT-based authentication**: All API endpoints require valid JWT tokens in Authorization header
+- **User service integration**: Validates JWT tokens via `watchthis-user-service /api/v1/auth/me`
 - **Permission enforcement**: Users can only access their own shares
 - **Comprehensive testing**: Full test coverage including authentication scenarios
+
+#### Authentication Header Required
+
+All API requests must include a valid JWT access token:
+
+```bash
+Authorization: Bearer <access_token>
+```
+
+To get JWT tokens, use the `watchthis-user-service` authentication endpoints.
 
 ### Health and Monitoring
 

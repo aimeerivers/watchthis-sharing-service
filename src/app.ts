@@ -7,7 +7,7 @@ import path from "path";
 
 import packageJson from "../package.json" with { type: "json" };
 import { mountApi } from "./api.js";
-import { findUserFromSession } from "./middleware/auth.js";
+import { authenticateJWT } from "./middleware/auth.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -44,8 +44,8 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Add authentication middleware globally
-app.use(findUserFromSession);
+// Add JWT authentication middleware globally
+app.use(authenticateJWT);
 
 mountApi("/api/v1", app);
 
