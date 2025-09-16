@@ -64,7 +64,11 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         message: testData.validMessage,
       };
 
-      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(201);
+      const res = await request(app)
+        .post("/api/v1/shares")
+        .set("Authorization", auth.authHeader)
+        .send(shareData)
+        .expect(201);
 
       assert.equal(res.body.success, true);
       assert.ok(res.body.data);
@@ -86,7 +90,11 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         toUserId: testData.anotherUserId.toString(),
       };
 
-      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(201);
+      const res = await request(app)
+        .post("/api/v1/shares")
+        .set("Authorization", auth.authHeader)
+        .send(shareData)
+        .expect(201);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.message, undefined);
@@ -99,7 +107,11 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         toUserId: testData.validToUserId.toString(),
       };
 
-      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(400);
+      const res = await request(app)
+        .post("/api/v1/shares")
+        .set("Authorization", auth.authHeader)
+        .send(shareData)
+        .expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "MISSING_FIELDS");
@@ -124,7 +136,11 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         mediaId: testData.validMediaId.toString(),
       };
 
-      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(400);
+      const res = await request(app)
+        .post("/api/v1/shares")
+        .set("Authorization", auth.authHeader)
+        .send(shareData)
+        .expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "MISSING_FIELDS");
@@ -138,7 +154,11 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         toUserId: testUsers.user1._id, // Same as authenticated user
       };
 
-      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(400);
+      const res = await request(app)
+        .post("/api/v1/shares")
+        .set("Authorization", auth.authHeader)
+        .send(shareData)
+        .expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "INVALID_SHARE");
@@ -153,7 +173,11 @@ describe("WatchThis Sharing Service - CRUD API", () => {
         message: "  Trimmed message  ",
       };
 
-      const res = await request(app).post("/api/v1/shares").set("Cookie", auth.cookie).send(shareData).expect(201);
+      const res = await request(app)
+        .post("/api/v1/shares")
+        .set("Authorization", auth.authHeader)
+        .send(shareData)
+        .expect(201);
 
       assert.equal(res.body.data.message, "Trimmed message");
     });
@@ -177,7 +201,10 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should get share by valid ID", async () => {
       const auth = authenticateAs(testUsers.user1);
 
-      const res = await request(app).get(`/api/v1/shares/${testShareId}`).set("Cookie", auth.cookie).expect(200);
+      const res = await request(app)
+        .get(`/api/v1/shares/${testShareId}`)
+        .set("Authorization", auth.authHeader)
+        .expect(200);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.id, testShareId);
@@ -188,7 +215,10 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should fail with invalid ID format", async () => {
       const auth = authenticateAs(testUsers.user1);
 
-      const res = await request(app).get(`/api/v1/shares/${testData.invalidId}`).set("Cookie", auth.cookie).expect(400);
+      const res = await request(app)
+        .get(`/api/v1/shares/${testData.invalidId}`)
+        .set("Authorization", auth.authHeader)
+        .expect(400);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "INVALID_ID");
@@ -198,7 +228,10 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       const auth = authenticateAs(testUsers.user1);
       const nonExistentId = new mongoose.Types.ObjectId();
 
-      const res = await request(app).get(`/api/v1/shares/${nonExistentId}`).set("Cookie", auth.cookie).expect(404);
+      const res = await request(app)
+        .get(`/api/v1/shares/${nonExistentId}`)
+        .set("Authorization", auth.authHeader)
+        .expect(404);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "SHARE_NOT_FOUND");
@@ -226,7 +259,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
       const res = await request(app)
         .patch(`/api/v1/shares/${testShareId}`)
-        .set("Cookie", auth.cookie)
+        .set("Authorization", auth.authHeader)
         .send({ status: "watched" })
         .expect(200);
 
@@ -240,7 +273,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
       const res = await request(app)
         .patch(`/api/v1/shares/${testShareId}`)
-        .set("Cookie", auth.cookie)
+        .set("Authorization", auth.authHeader)
         .send({ status: "archived" })
         .expect(200);
 
@@ -253,7 +286,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
       const res = await request(app)
         .patch(`/api/v1/shares/${testShareId}`)
-        .set("Cookie", auth.cookie)
+        .set("Authorization", auth.authHeader)
         .send({ status: "invalid-status" })
         .expect(400);
 
@@ -266,7 +299,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
       const res = await request(app)
         .patch(`/api/v1/shares/${testData.invalidId}`)
-        .set("Cookie", auth.cookie)
+        .set("Authorization", auth.authHeader)
         .send({ status: "watched" })
         .expect(400);
 
@@ -280,7 +313,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
       const res = await request(app)
         .patch(`/api/v1/shares/${nonExistentId}`)
-        .set("Cookie", auth.cookie)
+        .set("Authorization", auth.authHeader)
         .send({ status: "watched" })
         .expect(404);
 
@@ -307,7 +340,10 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should delete share by valid ID", async () => {
       const auth = authenticateAs(testUsers.user1);
 
-      const res = await request(app).delete(`/api/v1/shares/${testShareId}`).set("Cookie", auth.cookie).expect(200);
+      const res = await request(app)
+        .delete(`/api/v1/shares/${testShareId}`)
+        .set("Authorization", auth.authHeader)
+        .expect(200);
 
       assert.equal(res.body.success, true);
       assert.ok(res.body.message);
@@ -322,7 +358,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
       const res = await request(app)
         .delete(`/api/v1/shares/${testData.invalidId}`)
-        .set("Cookie", auth.cookie)
+        .set("Authorization", auth.authHeader)
         .expect(400);
 
       assert.equal(res.body.success, false);
@@ -333,7 +369,10 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       const auth = authenticateAs(testUsers.user1);
       const nonExistentId = new mongoose.Types.ObjectId();
 
-      const res = await request(app).delete(`/api/v1/shares/${nonExistentId}`).set("Cookie", auth.cookie).expect(404);
+      const res = await request(app)
+        .delete(`/api/v1/shares/${nonExistentId}`)
+        .set("Authorization", auth.authHeader)
+        .expect(404);
 
       assert.equal(res.body.success, false);
       assert.equal(res.body.error.code, "SHARE_NOT_FOUND");
@@ -374,7 +413,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should get all sent shares for user", async () => {
       const auth = authenticateAs(testUsers.user1);
 
-      const res = await request(app).get("/api/v1/shares/sent").set("Cookie", auth.cookie).expect(200);
+      const res = await request(app).get("/api/v1/shares/sent").set("Authorization", auth.authHeader).expect(200);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.length, 2);
@@ -387,7 +426,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
       const res = await request(app)
         .get("/api/v1/shares/sent")
-        .set("Cookie", auth.cookie)
+        .set("Authorization", auth.authHeader)
         .query({ status: "pending" })
         .expect(200);
 
@@ -401,7 +440,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
       const res = await request(app)
         .get("/api/v1/shares/sent")
-        .set("Cookie", auth.cookie)
+        .set("Authorization", auth.authHeader)
         .query({
           page: 1,
           limit: 1,
@@ -457,7 +496,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should get all received shares for user", async () => {
       const auth = authenticateAs(testUsers.user1);
 
-      const res = await request(app).get("/api/v1/shares/received").set("Cookie", auth.cookie).expect(200);
+      const res = await request(app).get("/api/v1/shares/received").set("Authorization", auth.authHeader).expect(200);
 
       assert.equal(res.body.success, true);
       assert.equal(res.body.data.length, 2);
@@ -470,7 +509,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
       const res = await request(app)
         .get("/api/v1/shares/received")
-        .set("Cookie", auth.cookie)
+        .set("Authorization", auth.authHeader)
         .query({ status: "pending" })
         .expect(200);
 
@@ -532,7 +571,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     it("should get sharing statistics for user", async () => {
       const auth = authenticateAs(testUsers.user1);
 
-      const res = await request(app).get("/api/v1/shares/stats").set("Cookie", auth.cookie).expect(200);
+      const res = await request(app).get("/api/v1/shares/stats").set("Authorization", auth.authHeader).expect(200);
 
       assert.equal(res.body.success, true);
       assert.ok(res.body.data.sent);

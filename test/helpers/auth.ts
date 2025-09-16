@@ -18,30 +18,39 @@ export const testUsers = {
 };
 
 /**
- * Mock the user service to return a successful authentication
+ * Mock the user service to return a successful JWT authentication
  * @param user - The user to authenticate as
  */
-export function mockUserServiceAuth(user: { _id: string; username: string }) {
+export function mockUserServiceJWTAuth(user: { _id: string; username: string }) {
   const userServiceUrl = process.env.USER_SERVICE_URL ?? "http://localhost:8583";
 
   nock(userServiceUrl)
     .persist() // Keep the mock active for multiple requests
-    .get("/api/v1/session")
+    .get("/api/v1/auth/me")
     .reply(200, {
-      user: {
-        _id: user._id,
-        username: user.username,
+      success: true,
+      data: {
+        user: {
+          _id: user._id,
+          username: user.username,
+        },
       },
     });
 }
 
 /**
- * Mock the user service to return authentication failure
+ * Mock the user service to return JWT authentication failure
  */
-export function mockUserServiceAuthFailure() {
+export function mockUserServiceJWTAuthFailure() {
   const userServiceUrl = process.env.USER_SERVICE_URL ?? "http://localhost:8583";
 
-  nock(userServiceUrl).persist().get("/api/v1/session").reply(401, { error: "Not authenticated" });
+  nock(userServiceUrl)
+    .persist()
+    .get("/api/v1/auth/me")
+    .reply(401, {
+      success: false,
+      error: { code: "AUTHENTICATION_REQUIRED", message: "Authentication required" },
+    });
 }
 
 /**
@@ -50,6 +59,10 @@ export function mockUserServiceAuthFailure() {
 export function clearUserServiceMocks() {
   nock.cleanAll();
 }
+
+// Backward compatibility aliases
+export const mockUserServiceAuth = mockUserServiceJWTAuth;
+export const mockUserServiceAuthFailure = mockUserServiceJWTAuthFailure;
 
 /**
  * Setup test data - creates ObjectIds for consistent testing
@@ -64,19 +77,22 @@ export const testData = {
 };
 
 /**
- * Create a mock session cookie for supertest requests
+ * Create a mock JWT token for supertest requests
  */
-export function createMockSessionCookie() {
-  return "connect.sid=s%3AmockSessionId.mockSignature";
+export function createMockJWTToken(user: { _id: string; username: string }) {
+  // In real implementation, this would be a proper JWT token
+  // For testing, we just need a string that our mock will recognize
+  return `mock-jwt-token-${user._id}`;
 }
 
 /**
  * Helper to make authenticated requests in tests
  */
 export function authenticateAs(user: { _id: string; username: string }) {
-  mockUserServiceAuth(user);
+  mockUserServiceJWTAuth(user);
   return {
-    cookie: createMockSessionCookie(),
+    token: createMockJWTToken(user),
+    authHeader: `Bearer ${createMockJWTToken(user)}`,
     user,
   };
 }
