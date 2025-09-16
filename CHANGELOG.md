@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.1.0...v1.2.0) (2025-09-16)
+
+
+### Features
+
+* Implement JWT authentication middleware and update related tests and documentation ([#7](https://github.com/aimeerivers/watchthis-sharing-service/issues/7)) ([0d992a4](https://github.com/aimeerivers/watchthis-sharing-service/commit/0d992a4eb10a890d67b92c314ed157accdcc2090))
+
 ## [1.1.0](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.0.0...v1.1.0) (2025-09-09)
 
 
