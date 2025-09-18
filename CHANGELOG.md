@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.2.0...v1.2.1) (2025-09-18)
+
+
+### Continuous Integration
+
+* Update Release Please to v4 ([#9](https://github.com/aimeerivers/watchthis-sharing-service/issues/9)) ([f754d1e](https://github.com/aimeerivers/watchthis-sharing-service/commit/f754d1e42f98f7779914b0145eb7a1f81b719d30))
+
 ## [1.2.0](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.1.0...v1.2.0) (2025-09-16)
 
 
