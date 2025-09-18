@@ -42,7 +42,7 @@
     "dotenv": "17.2.2",
     "express": "5.1.0",
     "helmet": "8.1.0",
-    "mongoose": "8.18.0",
+    "mongoose": "8.18.1",
     "pug": "3.0.3"
   },
   "devDependencies": {
@@ -50,11 +50,11 @@
     "@tailwindcss/postcss": "4.1.13",
     "@tailwindcss/typography": "0.5.16",
     "@types/express": "5.0.3",
-    "@types/node": "24.3.1",
+    "@types/node": "24.5.2",
     "@types/supertest": "6.0.3",
     "autoprefixer": "10.4.21",
     "concurrently": "9.2.1",
-    "eslint-config-plus-prettier": "4.2.0",
+    "eslint-config-plus-prettier": "4.2.2",
     "nock": "14.0.10",
     "nodemon": "3.1.10",
     "postcss": "8.5.6",
