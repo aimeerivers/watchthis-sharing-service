@@ -14,8 +14,8 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v3
+      - uses: googleapis/release-please-action@v4
         with:
+          config-file: .github/release-please-config.json
+          manifest-file: .github/.release-please-manifest.json
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-          release-type: node
-          changelog-types: '[{"type":"feat","section":"Features","hidden":false},{"type":"fix","section":"Bug Fixes","hidden":false},{"type":"deps","section":"Dependencies","hidden":false},{"type":"chore","section":"Chores","hidden":false},{"type":"docs","section":"Documentation","hidden":false}]'
