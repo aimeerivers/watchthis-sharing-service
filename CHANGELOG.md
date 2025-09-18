@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.2.1...v1.2.2) (2025-09-18)
+
+
+### Chores
+
+* Update dependencies ([#11](https://github.com/aimeerivers/watchthis-sharing-service/issues/11)) ([e0bde5a](https://github.com/aimeerivers/watchthis-sharing-service/commit/e0bde5ac5d487248bde1bfc9b7a54e896933cac4))
+
 ## [1.2.1](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.2.0...v1.2.1) (2025-09-18)
 
 
