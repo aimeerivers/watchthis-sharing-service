@@ -1,3 +1,4 @@
-package-lock.json
+.github/.release-please-manifest.json
 CHANGELOG.md
+package-lock.json
 public/styles/style.css
