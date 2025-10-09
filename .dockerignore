@@ -1,0 +1,16 @@
+.coverage
+.DS_Store
+.env
+.env.development.local
+.env.local
+.env.production.local
+.env.test.local
+.git
+.gitignore
+.nyc_output
+*.log
+coverage
+dist
+node_modules
+npm-debug.log
+README.md
