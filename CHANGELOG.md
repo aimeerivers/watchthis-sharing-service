@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.4](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.2.3...v1.2.4) (2025-10-09)
+
+
+### Chores
+
+* Enable building and publishing a Docker image ([#15](https://github.com/aimeerivers/watchthis-sharing-service/issues/15)) ([f1a3652](https://github.com/aimeerivers/watchthis-sharing-service/commit/f1a3652e1aeafd6a11f4aeca7bf82ecff9f10e51))
+
 ## [1.2.3](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.2.2...v1.2.3) (2025-09-21)
 
 
