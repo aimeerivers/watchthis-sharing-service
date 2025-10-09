@@ -1,0 +1,34 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      force_publish:
+        description: Force publish even if not on main branch
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  docker-build-publish:
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: aimeerivers/shared/.github/workflows/docker-build-publish.yml@main
+    with:
+      service_name: watchthis-sharing-service
+      dockerfile_path: ./Dockerfile
+      context_path: .
+      registry: ghcr.io
+      platforms: linux/amd64,linux/arm64
+    secrets:
+      REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
