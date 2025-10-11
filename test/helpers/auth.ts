@@ -79,7 +79,7 @@ export const testData = {
 /**
  * Create a mock JWT token for supertest requests
  */
-export function createMockJWTToken(user: { _id: string; username: string }) {
+function createMockJWTToken(user: { _id: string; username: string }) {
   // In real implementation, this would be a proper JWT token
   // For testing, we just need a string that our mock will recognize
   return `mock-jwt-token-${user._id}`;
