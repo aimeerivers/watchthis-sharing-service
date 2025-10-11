@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.5](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.2.4...v1.2.5) (2025-10-11)
+
+
+### Testing
+
+* Remove export of the createMockJWTToken function ([#17](https://github.com/aimeerivers/watchthis-sharing-service/issues/17)) ([6e3a7a2](https://github.com/aimeerivers/watchthis-sharing-service/commit/6e3a7a2fd1f2c4cdf1271c5ffba0f0e0426de1c3))
+
 ## [1.2.4](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.2.3...v1.2.4) (2025-10-09)
 
 

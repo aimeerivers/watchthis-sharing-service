@@ -1,6 +1,6 @@
 {
   "name": "watchthis-sharing-service",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Sharing service for WatchThis - handles media sharing between users",
   "keywords": [
     "media",
