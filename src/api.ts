@@ -1,9 +1,10 @@
 import type { Express, Response } from "express";
-import mongoose from "mongoose";
 
+import { prisma } from "./app.js";
 import { type RequestWithUser, requireAuth } from "./middleware/auth.js";
 import { Share } from "./models/share.js";
 import { asyncHandler } from "./utils/asyncHandler.js";
+import { isValidUUID } from "./utils/uuid.js";
 
 /**
  * Mount API routes on the Express app
@@ -22,7 +23,7 @@ export function mountApi(mountRoute: string, app: Express): void {
       const { mediaId, toUserId, message } = req.body;
 
       // Get fromUserId from authenticated session
-      const fromUserId = req.user!._id;
+      const fromUserId = req.user!.id;
 
       // Basic validation
       if (!mediaId || !toUserId) {
@@ -50,18 +51,16 @@ export function mountApi(mountRoute: string, app: Express): void {
       // TODO: Validate media ID exists via media service
       // TODO: Check if users are friends/allowed to share
 
-      const share = new Share({
+      const share = await Share.create({
         mediaId,
         fromUserId,
         toUserId,
         message: message?.trim(),
       });
 
-      await share.save();
-
       res.status(201).json({
         success: true,
-        data: share.toJSON(),
+        data: share,
       });
     })
   );
@@ -72,23 +71,29 @@ export function mountApi(mountRoute: string, app: Express): void {
     requireAuth,
     asyncHandler(async (req: RequestWithUser, res: Response) => {
       // Get userId from authenticated session
-      const userId = req.user!._id;
+      const userId = req.user!.id;
 
       const { status, page = 1, limit = 20 } = req.query;
       const skip = (Number(page) - 1) * Number(limit);
 
-      const filter: any = { fromUserId: userId };
+      const where: any = { fromUserId: userId };
       if (status && status !== "all") {
-        filter.status = status;
+        where.status = status;
       }
 
-      const shares = await Share.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit));
-
-      const total = await Share.countDocuments(filter);
+      const [shares, total] = await Promise.all([
+        prisma.share.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip,
+          take: Number(limit),
+        }),
+        prisma.share.count({ where }),
+      ]);
 
       res.json({
         success: true,
-        data: shares.map((share) => share.toJSON()),
+        data: shares,
         pagination: {
           page: Number(page),
           limit: Number(limit),
@@ -105,23 +110,29 @@ export function mountApi(mountRoute: string, app: Express): void {
     requireAuth,
     asyncHandler(async (req: RequestWithUser, res: Response) => {
       // Get userId from authenticated session
-      const userId = req.user!._id;
+      const userId = req.user!.id;
 
       const { status, page = 1, limit = 20 } = req.query;
       const skip = (Number(page) - 1) * Number(limit);
 
-      const filter: any = { toUserId: userId };
+      const where: any = { toUserId: userId };
       if (status && status !== "all") {
-        filter.status = status;
+        where.status = status;
       }
 
-      const shares = await Share.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit));
-
-      const total = await Share.countDocuments(filter);
+      const [shares, total] = await Promise.all([
+        prisma.share.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip,
+          take: Number(limit),
+        }),
+        prisma.share.count({ where }),
+      ]);
 
       res.json({
         success: true,
-        data: shares.map((share) => share.toJSON()),
+        data: shares,
         pagination: {
           page: Number(page),
           limit: Number(limit),
@@ -138,34 +149,26 @@ export function mountApi(mountRoute: string, app: Express): void {
     requireAuth,
     asyncHandler(async (req: RequestWithUser, res: Response) => {
       // Get userId from authenticated session
-      const userId = req.user!._id;
+      const userId = req.user!.id;
 
       const [sentStats, receivedStats] = await Promise.all([
-        Share.aggregate([
-          { $match: { fromUserId: new mongoose.Types.ObjectId(userId as string) } },
-          {
-            $group: {
-              _id: "$status",
-              count: { $sum: 1 },
-            },
-          },
-        ]),
-        Share.aggregate([
-          { $match: { toUserId: new mongoose.Types.ObjectId(userId as string) } },
-          {
-            $group: {
-              _id: "$status",
-              count: { $sum: 1 },
-            },
-          },
-        ]),
+        prisma.share.groupBy({
+          by: ["status"],
+          where: { fromUserId: userId as string },
+          _count: { status: true },
+        }),
+        prisma.share.groupBy({
+          by: ["status"],
+          where: { toUserId: userId as string },
+          _count: { status: true },
+        }),
       ]);
 
       const formatStats = (stats: any[]) => {
         const result = { pending: 0, watched: 0, archived: 0, total: 0 };
         stats.forEach((stat) => {
-          result[stat._id as keyof typeof result] = stat.count;
-          result.total += stat.count;
+          result[stat.status as keyof typeof result] = stat._count.status;
+          result.total += stat._count.status;
         });
         return result;
       };
@@ -186,9 +189,9 @@ export function mountApi(mountRoute: string, app: Express): void {
     requireAuth,
     asyncHandler(async (req: RequestWithUser, res: Response) => {
       const { id } = req.params;
-      const userId = req.user!._id;
+      const userId = req.user!.id;
 
-      if (!mongoose.Types.ObjectId.isValid(id)) {
+      if (!isValidUUID(id)) {
         return res.status(400).json({
           success: false,
           error: {
@@ -223,7 +226,7 @@ export function mountApi(mountRoute: string, app: Express): void {
 
       res.json({
         success: true,
-        data: share.toJSON(),
+        data: share,
       });
     })
   );
@@ -235,9 +238,9 @@ export function mountApi(mountRoute: string, app: Express): void {
     asyncHandler(async (req: RequestWithUser, res: Response) => {
       const { id } = req.params;
       const { status } = req.body;
-      const userId = req.user!._id;
+      const userId = req.user!.id;
 
-      if (!mongoose.Types.ObjectId.isValid(id)) {
+      if (!isValidUUID(id)) {
         return res.status(400).json({
           success: false,
           error: {
@@ -291,15 +294,16 @@ export function mountApi(mountRoute: string, app: Express): void {
         });
       }
 
+      const updateData: any = {};
       if (status) {
-        share.status = status;
+        updateData.status = status;
       }
 
-      await share.save();
+      const updatedShare = await Share.update(id, updateData);
 
       res.json({
         success: true,
-        data: share.toJSON(),
+        data: updatedShare,
       });
     })
   );
@@ -310,9 +314,9 @@ export function mountApi(mountRoute: string, app: Express): void {
     requireAuth,
     asyncHandler(async (req: RequestWithUser, res: Response) => {
       const { id } = req.params;
-      const userId = req.user!._id;
+      const userId = req.user!.id;
 
-      if (!mongoose.Types.ObjectId.isValid(id)) {
+      if (!isValidUUID(id)) {
         return res.status(400).json({
           success: false,
           error: {

@@ -1,0 +1,31 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"] // For Alpine Linux
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Share {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mediaId    String   @map("media_id") @db.Uuid
+  fromUserId String   @map("from_user_id") @db.Uuid
+  toUserId   String   @map("to_user_id") @db.Uuid
+  message    String?
+  status     String   @default("pending")
+  watchedAt  DateTime? @map("watched_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("shares")
+  @@index([mediaId])
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([status])
+  @@index([fromUserId, createdAt])
+  @@index([toUserId, status, createdAt])
+  @@index([toUserId, status])
+  @@index([fromUserId, status])
+}

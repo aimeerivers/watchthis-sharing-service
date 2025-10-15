@@ -1,8 +1,8 @@
+import { PrismaClient } from "@prisma/client";
 import appRootPath from "app-root-path";
 import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
-import mongoose from "mongoose";
 import path from "path";
 
 import packageJson from "../package.json" with { type: "json" };
@@ -10,19 +10,20 @@ import { mountApi } from "./api.js";
 import { authenticateJWT } from "./middleware/auth.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 
-dotenv.config();
+const envFile = process.env.NODE_ENV === "test" ? ".env.test" : ".env";
+dotenv.config({ path: envFile });
 
-const mongoUrl = process.env.MONGO_URL ?? "mongodb://localhost:27017/sharing-service";
-const mongoSharingService = `${mongoUrl}${process.env.NODE_ENV === "test" ? "-test" : ""}`;
+// Initialize Prisma client
+export const prisma = new PrismaClient();
 
-mongoose
-  .connect(mongoSharingService)
-  .then(() => {
-    console.log("Database connected!");
-  })
-  .catch((err: Error) => {
-    console.log(err);
-  });
+// Connect to database
+try {
+  await prisma.$connect();
+  console.log("Database connected!");
+} catch (err: unknown) {
+  console.error("Database connection failed:", err);
+  process.exit(1);
+}
 
 const app = express();
 
@@ -67,18 +68,14 @@ app.get("/ping", (_req, res) => {
 app.get("/health", async (_req, res) => {
   try {
     // Check database connection
-    if (mongoose.connection.db) {
-      await mongoose.connection.db.admin().ping();
-      res.json({
-        service: packageJson.name,
-        version: packageJson.version,
-        status: "healthy",
-        timestamp: new Date().toISOString(),
-        database: "connected",
-      });
-    } else {
-      throw new Error("Database not connected");
-    }
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({
+      service: packageJson.name,
+      version: packageJson.version,
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      database: "connected",
+    });
   } catch (error) {
     res.status(503).json({
       service: packageJson.name,

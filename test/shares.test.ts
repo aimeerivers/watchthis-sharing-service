@@ -1,11 +1,11 @@
 import assert from "node:assert";
+import crypto from "node:crypto";
 import type { Server } from "node:http";
 import { after, before, beforeEach, describe, it } from "node:test";
 
-import mongoose from "mongoose";
 import request from "supertest";
 
-import { app } from "../src/app.js";
+import { app, prisma } from "../src/app.js";
 import { Share } from "../src/models/share.js";
 import { authenticateAs, clearUserServiceMocks, testData, testUsers } from "./helpers/auth.js";
 
@@ -17,11 +17,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     server = app.listen(port);
 
     // Wait for database connection to be ready
-    if (mongoose.connection.readyState !== 1) {
-      await new Promise((resolve) => {
-        mongoose.connection.once("connected", resolve);
-      });
-    }
+    await prisma.$connect();
 
     // Clean up any existing test data
     await Share.deleteMany({});
@@ -38,12 +34,10 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       server.close(async () => {
         try {
           // Clean up test data before closing connection
-          if (mongoose.connection.readyState === 1) {
-            await Share.deleteMany({});
-          }
+          await Share.deleteMany({});
 
-          // Close the MongoDB connection to allow the test process to exit cleanly
-          await mongoose.connection.close();
+          // Close the database connection to allow the test process to exit cleanly
+          await prisma.$disconnect();
           console.log("CRUD test cleanup completed");
         } catch (error) {
           console.error("Error during CRUD test cleanup:", error);
@@ -73,7 +67,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       assert.equal(res.body.success, true);
       assert.ok(res.body.data);
       assert.equal(res.body.data.mediaId, shareData.mediaId);
-      assert.equal(res.body.data.fromUserId, testUsers.user1._id);
+      assert.equal(res.body.data.fromUserId, testUsers.user1.id);
       assert.equal(res.body.data.toUserId, shareData.toUserId);
       assert.equal(res.body.data.message, shareData.message);
       assert.equal(res.body.data.status, "pending");
@@ -151,7 +145,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
       const shareData = {
         mediaId: testData.validMediaId.toString(),
-        toUserId: testUsers.user1._id, // Same as authenticated user
+        toUserId: testUsers.user1.id, // Same as authenticated user
       };
 
       const res = await request(app)
@@ -188,14 +182,13 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     before(async () => {
       // Create a test share
-      const share = new Share({
+      const savedShare = await Share.create({
         mediaId: testData.validMediaId,
         fromUserId: testData.validFromUserId,
         toUserId: testData.validToUserId,
         message: "Test share for GET",
       });
-      const savedShare = await share.save();
-      testShareId = savedShare._id.toString();
+      testShareId = savedShare.id;
     });
 
     it("should get share by valid ID", async () => {
@@ -226,7 +219,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail with non-existent ID", async () => {
       const auth = authenticateAs(testUsers.user1);
-      const nonExistentId = new mongoose.Types.ObjectId();
+      const nonExistentId = crypto.randomUUID();
 
       const res = await request(app)
         .get(`/api/v1/shares/${nonExistentId}`)
@@ -244,14 +237,13 @@ describe("WatchThis Sharing Service - CRUD API", () => {
     before(async () => {
       // Create a test share where user2 sends to user1
       // So when user1 authenticates, they can mark it as watched (recipient permission)
-      const share = new Share({
+      const savedShare = await Share.create({
         mediaId: testData.validMediaId,
-        fromUserId: testUsers.user2._id, // user2 sends
-        toUserId: testUsers.user1._id, // user1 receives
+        fromUserId: testUsers.user2.id, // user2 sends
+        toUserId: testUsers.user1.id, // user1 receives
         message: "Test share for PATCH",
       });
-      const savedShare = await share.save();
-      testShareId = savedShare._id.toString();
+      testShareId = savedShare.id;
     });
 
     it("should mark share as watched", async () => {
@@ -309,7 +301,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail with non-existent ID", async () => {
       const auth = authenticateAs(testUsers.user1);
-      const nonExistentId = new mongoose.Types.ObjectId();
+      const nonExistentId = crypto.randomUUID();
 
       const res = await request(app)
         .patch(`/api/v1/shares/${nonExistentId}`)
@@ -327,14 +319,13 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     beforeEach(async () => {
       // Create a fresh test share for each delete test
-      const share = new Share({
+      const savedShare = await Share.create({
         mediaId: testData.validMediaId,
         fromUserId: testData.validFromUserId,
         toUserId: testData.validToUserId,
         message: "Test share for DELETE",
       });
-      const savedShare = await share.save();
-      testShareId = savedShare._id.toString();
+      testShareId = savedShare.id;
     });
 
     it("should delete share by valid ID", async () => {
@@ -367,7 +358,7 @@ describe("WatchThis Sharing Service - CRUD API", () => {
 
     it("should fail with non-existent ID", async () => {
       const auth = authenticateAs(testUsers.user1);
-      const nonExistentId = new mongoose.Types.ObjectId();
+      const nonExistentId = crypto.randomUUID();
 
       const res = await request(app)
         .delete(`/api/v1/shares/${nonExistentId}`)
@@ -385,25 +376,25 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       await Share.deleteMany({});
 
       // Create shares from our test user
-      await Share.create([
+      await Share.createMany([
         {
           mediaId: testData.validMediaId,
-          fromUserId: testUsers.user1._id,
-          toUserId: testUsers.user2._id,
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id,
           message: "Sent share 1",
           status: "pending",
         },
         {
           mediaId: testData.validMediaId,
-          fromUserId: testUsers.user1._id,
-          toUserId: testUsers.user2._id,
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id,
           message: "Sent share 2",
           status: "watched",
         },
         {
           mediaId: testData.validMediaId,
-          fromUserId: testUsers.user2._id, // Different sender
-          toUserId: testUsers.user1._id,
+          fromUserId: testUsers.user2.id, // Different sender
+          toUserId: testUsers.user1.id,
           message: "Not our share",
           status: "pending",
         },
@@ -468,25 +459,25 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       await Share.deleteMany({});
 
       // Create shares received by our test user
-      await Share.create([
+      await Share.createMany([
         {
           mediaId: testData.validMediaId,
-          fromUserId: testUsers.user2._id,
-          toUserId: testUsers.user1._id, // Our test user receives
+          fromUserId: testUsers.user2.id,
+          toUserId: testUsers.user1.id, // Our test user receives
           message: "Received share 1",
           status: "pending",
         },
         {
           mediaId: testData.validMediaId,
-          fromUserId: testUsers.user2._id,
-          toUserId: testUsers.user1._id, // Our test user receives
+          fromUserId: testUsers.user2.id,
+          toUserId: testUsers.user1.id, // Our test user receives
           message: "Received share 2",
           status: "watched",
         },
         {
           mediaId: testData.validMediaId,
-          fromUserId: testUsers.user1._id,
-          toUserId: testUsers.user2._id, // Different receiver
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id, // Different receiver
           message: "Not our share",
           status: "pending",
         },
@@ -532,37 +523,37 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       await Share.deleteMany({});
 
       // Create various shares for statistics
-      await Share.create([
+      await Share.createMany([
         // Sent by test user
         {
           mediaId: testData.validMediaId,
-          fromUserId: testUsers.user1._id,
-          toUserId: testUsers.user2._id,
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id,
           status: "pending",
         },
         {
           mediaId: testData.validMediaId,
-          fromUserId: testUsers.user1._id,
-          toUserId: testUsers.user2._id,
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id,
           status: "watched",
         },
         {
           mediaId: testData.validMediaId,
-          fromUserId: testUsers.user1._id,
-          toUserId: testUsers.user2._id,
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id,
           status: "archived",
         },
         // Received by test user
         {
           mediaId: testData.validMediaId,
-          fromUserId: testUsers.user2._id,
-          toUserId: testUsers.user1._id,
+          fromUserId: testUsers.user2.id,
+          toUserId: testUsers.user1.id,
           status: "pending",
         },
         {
           mediaId: testData.validMediaId,
-          fromUserId: testUsers.user2._id,
-          toUserId: testUsers.user1._id,
+          fromUserId: testUsers.user2.id,
+          toUserId: testUsers.user1.id,
           status: "watched",
         },
       ]);

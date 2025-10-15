@@ -1,6 +1,4 @@
-import mongoose from "mongoose";
-
-import { app } from "./app.js";
+import { app, prisma } from "./app.js";
 
 const port = process.env.PORT || (process.env.NODE_ENV === "test" ? 18372 : 8372);
 
@@ -16,7 +14,7 @@ const gracefulShutdown = async (signal: string) => {
     console.log("HTTP server closed");
 
     try {
-      await mongoose.connection.close();
+      await prisma.$disconnect();
       console.log("Database connection closed");
     } catch (error) {
       console.error("Error closing database connection:", error);

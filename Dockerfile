@@ -14,14 +14,17 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Generate Prisma client in builder stage
+RUN npx prisma generate
+
 # Build the TypeScript application
 RUN npm run build
 
 # Production stage
 FROM node:18-alpine AS production
 
-# Install curl for health checks (temporary fix)
-RUN apk add --no-cache curl
+# Install curl and OpenSSL for health checks and Prisma
+RUN apk add --no-cache curl openssl
 
 # Set working directory
 WORKDIR /app
@@ -34,6 +37,7 @@ RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/views ./views
 

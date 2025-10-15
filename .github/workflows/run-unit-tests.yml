@@ -9,10 +9,19 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      mongodb:
-        image: mongo:latest
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: watchthis
+          POSTGRES_PASSWORD: watchthis_dev
+          POSTGRES_DB: watchthis_sharing_test
         ports:
-          - 27017:27017
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -27,6 +36,9 @@ jobs:
 
       - name: Build source code
         run: npm run build
+
+      - name: Setup database
+        run: npm run database:test:setup
 
       - name: Run unit tests
         run: npm run test

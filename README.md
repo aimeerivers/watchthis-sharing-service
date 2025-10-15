@@ -30,9 +30,49 @@ This service is part of the WatchThis microservice ecosystem and integrates with
 
 ### Prerequisites
 
-- Node.js 18+
-- MongoDB running locally
+- Node.js 22+
+- PostgreSQL 16+ running locally
 - Git
+
+### PostgreSQL Database Setup
+
+1. **Install PostgreSQL** (if not already installed):
+
+   ```bash
+   # macOS with Homebrew
+   brew install postgresql
+   brew services start postgresql
+
+   # Ubuntu/Debian
+   sudo apt update
+   sudo apt install postgresql postgresql-contrib
+   sudo systemctl start postgresql
+
+   # Windows
+   # Download from https://www.postgresql.org/download/windows/
+   ```
+
+2. **Create database and user**:
+
+   ```bash
+   # Connect to PostgreSQL as superuser
+   psql -U postgres
+
+   # Create user and databases
+   CREATE USER watchthis WITH PASSWORD 'watchthis_dev';
+   CREATE DATABASE watchthis_sharing OWNER watchthis;
+   CREATE DATABASE watchthis_sharing_test OWNER watchthis;
+   GRANT ALL PRIVILEGES ON DATABASE watchthis_sharing TO watchthis;
+   GRANT ALL PRIVILEGES ON DATABASE watchthis_sharing_test TO watchthis;
+   \q
+   ```
+
+3. **Verify connection**:
+   ```bash
+   psql -U watchthis -d watchthis_sharing -h localhost
+   # Enter password: watchthis_dev
+   # Should connect successfully, then type \q to quit
+   ```
 
 ### Installation
 
@@ -41,7 +81,8 @@ git clone <repository-url>
 cd watchthis-sharing-service
 npm install
 cp .env.example .env
-# Edit .env with your configuration
+# Edit .env with your PostgreSQL connection string
+npm run database:setup  # Set up Prisma schema
 npm run dev
 ```
 
@@ -53,56 +94,32 @@ curl http://localhost:8372/health
 
 ## Getting started
 
-Add a `.env` file and add some environment variables:
-
-```text
-BASE_URL=http://localhost:8372
-MONGO_URL=mongodb://localhost:27017/sharing-service
-USER_SERVICE_URL=http://localhost:8583
-MEDIA_SERVICE_URL=http://localhost:8584
-```
-
-Install npm dependencies
+### Installation
 
 ```bash
 npm install
 ```
 
-## Build the source code
+### Development
 
 ```bash
-npm run build
-```
-
-## Run unit tests
-
-```bash
-npm run test
-```
-
-**Status:** ✅ All 31 tests passing - Complete API coverage including CRUD operations, validation, pagination, and error handling.
-
-## Build CSS
-
-```bash
-npm run tailwind:css
-```
-
-## Run the server locally
-
-```bash
-npm run start
-```
-
-Visit http://localhost:8372 in your browser
-
-## Run in development mode
-
-```bash
+# Run in development mode (auto-restart on changes)
 npm run dev
-```
 
-This will automatically rebuild the source code and restart the server for you.
+# Build TypeScript
+npm run build
+
+# Run tests
+npm run test
+
+# Database management
+npm run database:setup         # Set up database schema
+npm run database:test:setup    # Set up test database schema
+
+# Lint and format code
+npm run lint
+npm run format
+```
 
 ## API Endpoints
 

@@ -9,7 +9,7 @@ import type { RequestWithUser } from "../../src/middleware/auth.js";
 export const mockAuth = (userId: string, username = "testuser") => {
   return (req: RequestWithUser, _res: Response, next: NextFunction): void => {
     req.user = {
-      _id: userId,
+      id: userId,
       username,
     };
     next();

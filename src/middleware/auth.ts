@@ -5,7 +5,7 @@ dotenv.config();
 
 export interface RequestWithUser extends Request {
   user?: {
-    _id: string;
+    id: string;
     username: string;
   };
 }
@@ -14,7 +14,7 @@ type JWTUserData = {
   success: boolean;
   data: {
     user: {
-      _id: string;
+      id: string;
       username: string;
     };
   };
