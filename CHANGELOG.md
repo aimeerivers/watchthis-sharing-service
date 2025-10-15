@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.2.5...v2.0.0) (2025-10-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* Sharing Service will now use PostgreSQL. Please update accordingly.
+
+### Features
+
+* Migrate from MongoDB to PostgreSQL ([#19](https://github.com/aimeerivers/watchthis-sharing-service/issues/19)) ([573ff29](https://github.com/aimeerivers/watchthis-sharing-service/commit/573ff29020881caca73139c7de387149cccb2853))
+
 ## [1.2.5](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.2.4...v1.2.5) (2025-10-11)
 
 
