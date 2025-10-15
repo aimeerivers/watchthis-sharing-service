@@ -376,31 +376,29 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       await Share.deleteMany({});
 
       // Create shares from our test user
-      await Share.createMany({
-        data: [
-          {
-            mediaId: testData.validMediaId,
-            fromUserId: testUsers.user1.id,
-            toUserId: testUsers.user2.id,
-            message: "Sent share 1",
-            status: "pending",
-          },
-          {
-            mediaId: testData.validMediaId,
-            fromUserId: testUsers.user1.id,
-            toUserId: testUsers.user2.id,
-            message: "Sent share 2",
-            status: "watched",
-          },
-          {
-            mediaId: testData.validMediaId,
-            fromUserId: testUsers.user2.id, // Different sender
-            toUserId: testUsers.user1.id,
-            message: "Not our share",
-            status: "pending",
-          },
-        ],
-      });
+      await Share.createMany([
+        {
+          mediaId: testData.validMediaId,
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id,
+          message: "Sent share 1",
+          status: "pending",
+        },
+        {
+          mediaId: testData.validMediaId,
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id,
+          message: "Sent share 2",
+          status: "watched",
+        },
+        {
+          mediaId: testData.validMediaId,
+          fromUserId: testUsers.user2.id, // Different sender
+          toUserId: testUsers.user1.id,
+          message: "Not our share",
+          status: "pending",
+        },
+      ]);
     });
 
     it("should get all sent shares for user", async () => {
@@ -461,31 +459,29 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       await Share.deleteMany({});
 
       // Create shares received by our test user
-      await Share.createMany({
-        data: [
-          {
-            mediaId: testData.validMediaId,
-            fromUserId: testUsers.user2.id,
-            toUserId: testUsers.user1.id, // Our test user receives
-            message: "Received share 1",
-            status: "pending",
-          },
-          {
-            mediaId: testData.validMediaId,
-            fromUserId: testUsers.user2.id,
-            toUserId: testUsers.user1.id, // Our test user receives
-            message: "Received share 2",
-            status: "watched",
-          },
-          {
-            mediaId: testData.validMediaId,
-            fromUserId: testUsers.user1.id,
-            toUserId: testUsers.user2.id, // Different receiver
-            message: "Not our share",
-            status: "pending",
-          },
-        ],
-      });
+      await Share.createMany([
+        {
+          mediaId: testData.validMediaId,
+          fromUserId: testUsers.user2.id,
+          toUserId: testUsers.user1.id, // Our test user receives
+          message: "Received share 1",
+          status: "pending",
+        },
+        {
+          mediaId: testData.validMediaId,
+          fromUserId: testUsers.user2.id,
+          toUserId: testUsers.user1.id, // Our test user receives
+          message: "Received share 2",
+          status: "watched",
+        },
+        {
+          mediaId: testData.validMediaId,
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id, // Different receiver
+          message: "Not our share",
+          status: "pending",
+        },
+      ]);
     });
 
     it("should get all received shares for user", async () => {
@@ -527,42 +523,40 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       await Share.deleteMany({});
 
       // Create various shares for statistics
-      await Share.createMany({
-        data: [
-          // Sent by test user
-          {
-            mediaId: testData.validMediaId,
-            fromUserId: testUsers.user1.id,
-            toUserId: testUsers.user2.id,
-            status: "pending",
-          },
-          {
-            mediaId: testData.validMediaId,
-            fromUserId: testUsers.user1.id,
-            toUserId: testUsers.user2.id,
-            status: "watched",
-          },
-          {
-            mediaId: testData.validMediaId,
-            fromUserId: testUsers.user1.id,
-            toUserId: testUsers.user2.id,
-            status: "archived",
-          },
-          // Received by test user
-          {
-            mediaId: testData.validMediaId,
-            fromUserId: testUsers.user2.id,
-            toUserId: testUsers.user1.id,
-            status: "pending",
-          },
-          {
-            mediaId: testData.validMediaId,
-            fromUserId: testUsers.user2.id,
-            toUserId: testUsers.user1.id,
-            status: "watched",
-          },
-        ],
-      });
+      await Share.createMany([
+        // Sent by test user
+        {
+          mediaId: testData.validMediaId,
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id,
+          status: "pending",
+        },
+        {
+          mediaId: testData.validMediaId,
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id,
+          status: "watched",
+        },
+        {
+          mediaId: testData.validMediaId,
+          fromUserId: testUsers.user1.id,
+          toUserId: testUsers.user2.id,
+          status: "archived",
+        },
+        // Received by test user
+        {
+          mediaId: testData.validMediaId,
+          fromUserId: testUsers.user2.id,
+          toUserId: testUsers.user1.id,
+          status: "pending",
+        },
+        {
+          mediaId: testData.validMediaId,
+          fromUserId: testUsers.user2.id,
+          toUserId: testUsers.user1.id,
+          status: "watched",
+        },
+      ]);
     });
 
     it("should get sharing statistics for user", async () => {

@@ -46,9 +46,9 @@ export class Share {
     });
   }
 
-  static async createMany(data: { data: Prisma.ShareCreateManyInput[] }): Promise<{ count: number }> {
+  static async createMany(data: Prisma.ShareCreateManyInput[]): Promise<{ count: number }> {
     // Handle watchedAt middleware for bulk creation
-    const processedData = data.data.map((share) => ({
+    const processedData = data.map((share) => ({
       ...share,
       watchedAt: share.status === "watched" ? new Date() : share.watchedAt,
     }));
