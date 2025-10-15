@@ -2,10 +2,9 @@ import assert from "node:assert";
 import type { Server } from "node:http";
 import { after, before, describe, it } from "node:test";
 
-import mongoose from "mongoose";
 import request from "supertest";
 
-import { app } from "../src/app.js";
+import { app, prisma } from "../src/app.js";
 
 const port = 18372;
 let server: Server;
@@ -13,20 +12,16 @@ describe("WatchThis Sharing Service App", () => {
   before(async () => {
     server = app.listen(port);
 
-    // Wait for database connection to be ready
-    if (mongoose.connection.readyState !== 1) {
-      await new Promise((resolve) => {
-        mongoose.connection.once("connected", resolve);
-      });
-    }
+    // Ensure Prisma is connected
+    await prisma.$connect();
   });
 
   after(async () => {
     return new Promise<void>((resolve) => {
       server.close(async () => {
         try {
-          // Close the MongoDB connection to allow the test process to exit cleanly
-          await mongoose.connection.close();
+          // Close the Prisma connection to allow the test process to exit cleanly
+          await prisma.$disconnect();
           console.log("Test cleanup completed");
         } catch (error) {
           console.error("Error during test cleanup:", error);

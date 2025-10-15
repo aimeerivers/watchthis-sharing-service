@@ -1,18 +1,19 @@
-import mongoose from "mongoose";
+import crypto from "node:crypto";
+
 import nock from "nock";
 
 // Test user data
 export const testUsers = {
   user1: {
-    _id: "507f1f77bcf86cd799439011",
+    id: "550e8400-e29b-41d4-a716-446655440001",
     username: "testuser1",
   },
   user2: {
-    _id: "507f1f77bcf86cd799439012",
+    id: "550e8400-e29b-41d4-a716-446655440002",
     username: "testuser2",
   },
   user3: {
-    _id: "507f1f77bcf86cd799439013",
+    id: "550e8400-e29b-41d4-a716-446655440003",
     username: "testuser3",
   },
 };
@@ -21,7 +22,7 @@ export const testUsers = {
  * Mock the user service to return a successful JWT authentication
  * @param user - The user to authenticate as
  */
-export function mockUserServiceJWTAuth(user: { _id: string; username: string }) {
+export function mockUserServiceJWTAuth(user: { id: string; username: string }) {
   const userServiceUrl = process.env.USER_SERVICE_URL ?? "http://localhost:8583";
 
   nock(userServiceUrl)
@@ -31,7 +32,7 @@ export function mockUserServiceJWTAuth(user: { _id: string; username: string }) 
       success: true,
       data: {
         user: {
-          _id: user._id,
+          id: user.id,
           username: user.username,
         },
       },
@@ -65,13 +66,13 @@ export const mockUserServiceAuth = mockUserServiceJWTAuth;
 export const mockUserServiceAuthFailure = mockUserServiceJWTAuthFailure;
 
 /**
- * Setup test data - creates ObjectIds for consistent testing
+ * Setup test data - creates UUIDs for consistent testing
  */
 export const testData = {
-  validMediaId: new mongoose.Types.ObjectId(),
-  validFromUserId: new mongoose.Types.ObjectId(testUsers.user1._id),
-  validToUserId: new mongoose.Types.ObjectId(testUsers.user2._id),
-  anotherUserId: new mongoose.Types.ObjectId(testUsers.user3._id),
+  validMediaId: crypto.randomUUID(),
+  validFromUserId: testUsers.user1.id,
+  validToUserId: testUsers.user2.id,
+  anotherUserId: testUsers.user3.id,
   invalidId: "invalid-id",
   validMessage: "Check out this awesome video!",
 };
@@ -79,16 +80,16 @@ export const testData = {
 /**
  * Create a mock JWT token for supertest requests
  */
-function createMockJWTToken(user: { _id: string; username: string }) {
+function createMockJWTToken(user: { id: string; username: string }) {
   // In real implementation, this would be a proper JWT token
   // For testing, we just need a string that our mock will recognize
-  return `mock-jwt-token-${user._id}`;
+  return `mock-jwt-token-${user.id}`;
 }
 
 /**
  * Helper to make authenticated requests in tests
  */
-export function authenticateAs(user: { _id: string; username: string }) {
+export function authenticateAs(user: { id: string; username: string }) {
   mockUserServiceJWTAuth(user);
   return {
     token: createMockJWTToken(user),

@@ -1,83 +1,154 @@
-import type { Document, ObjectId } from "mongoose";
-import mongoose from "mongoose";
+import { type Prisma, type Share as PrismaShare } from "@prisma/client";
 
-export interface IShare extends Document {
-  _id: ObjectId;
-  mediaId: ObjectId;
-  fromUserId: ObjectId;
-  toUserId: ObjectId;
-  message?: string;
+import { prisma } from "../app.js";
+
+export interface IShare {
+  id: string;
+  mediaId: string;
+  fromUserId: string;
+  toUserId: string;
+  message?: string | null;
   status: "pending" | "watched" | "archived";
-  watchedAt?: Date;
+  watchedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const ShareSchema = new mongoose.Schema<IShare>(
-  {
-    mediaId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      index: true,
-    },
-    fromUserId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      index: true,
-    },
-    toUserId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      index: true,
-    },
-    message: {
-      type: String,
-      maxLength: 500,
-      trim: true,
-    },
-    status: {
-      type: String,
-      enum: ["pending", "watched", "archived"],
-      default: "pending",
-      index: true,
-    },
-    watchedAt: {
-      type: Date,
-    },
-  },
-  {
-    timestamps: true,
+export class Share {
+  static async findById(id: string): Promise<PrismaShare | null> {
+    return await prisma.share.findUnique({
+      where: { id },
+    });
   }
-);
 
-// Compound indexes for common queries
-ShareSchema.index({ fromUserId: 1, createdAt: -1 });
-ShareSchema.index({ toUserId: 1, status: 1, createdAt: -1 });
-ShareSchema.index({ toUserId: 1, status: 1 });
-ShareSchema.index({ fromUserId: 1, status: 1 });
-
-// Virtual for id field
-ShareSchema.virtual("id").get(function () {
-  return this._id as ObjectId;
-});
-
-ShareSchema.set("toJSON", {
-  virtuals: true,
-  transform: function (_doc, ret) {
-    // eslint-disable-next-line no-unused-vars
-    const { _id, __v, ...cleanRet } = ret;
-    return cleanRet;
-  },
-});
-
-// Middleware to set watchedAt when status changes to watched
-ShareSchema.pre("save", function (next) {
-  if (this.isModified("status") && this.status === "watched" && !this.watchedAt) {
-    this.watchedAt = new Date();
+  static async findOne(where: Prisma.ShareWhereInput): Promise<PrismaShare | null> {
+    return await prisma.share.findFirst({
+      where,
+    });
   }
-  next();
-});
 
-const Share = mongoose.model("Share", ShareSchema);
+  static async find(where?: Prisma.ShareWhereInput): Promise<PrismaShare[]> {
+    return await prisma.share.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+    });
+  }
 
-export { Share };
+  static async create(data: Prisma.ShareCreateInput): Promise<PrismaShare> {
+    // Handle watchedAt middleware: set watchedAt if status is "watched"
+    const shareData = {
+      ...data,
+      watchedAt: data.status === "watched" ? new Date() : data.watchedAt,
+    };
+
+    return await prisma.share.create({
+      data: shareData,
+    });
+  }
+
+  static async createMany(data: { data: Prisma.ShareCreateManyInput[] }): Promise<{ count: number }> {
+    // Handle watchedAt middleware for bulk creation
+    const processedData = data.data.map((share) => ({
+      ...share,
+      watchedAt: share.status === "watched" ? new Date() : share.watchedAt,
+    }));
+
+    return await prisma.share.createMany({
+      data: processedData,
+    });
+  }
+
+  static async update(id: string, data: Prisma.ShareUpdateInput): Promise<PrismaShare | null> {
+    try {
+      // Handle watchedAt middleware: set watchedAt if status is changing to "watched"
+      const updateData = { ...data };
+      if (data.status === "watched" && !data.watchedAt) {
+        updateData.watchedAt = new Date();
+      }
+
+      return await prisma.share.update({
+        where: { id },
+        data: updateData,
+      });
+    } catch (error) {
+      if (error instanceof Error && "code" in error && error.code === "P2025") {
+        return null; // Record not found
+      }
+      throw error;
+    }
+  }
+
+  static async findByIdAndUpdate(id: string, data: Prisma.ShareUpdateInput): Promise<PrismaShare | null> {
+    return await this.update(id, data);
+  }
+
+  static async deleteMany(where?: Prisma.ShareWhereInput): Promise<{ count: number }> {
+    return await prisma.share.deleteMany({
+      where,
+    });
+  }
+
+  static async countDocuments(where?: Prisma.ShareWhereInput): Promise<number> {
+    return await prisma.share.count({
+      where,
+    });
+  }
+
+  static async findByIdAndDelete(id: string): Promise<PrismaShare | null> {
+    try {
+      return await prisma.share.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error instanceof Error && "code" in error && error.code === "P2025") {
+        return null; // Record not found
+      }
+      throw error;
+    }
+  }
+
+  // Specific queries for sharing service
+  static async findUserShares(
+    userId: string,
+    options: {
+      status?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<PrismaShare[]> {
+    const { status, page = 1, limit = 20 } = options;
+    const skip = (page - 1) * limit;
+
+    return await prisma.share.findMany({
+      where: {
+        toUserId: userId,
+        ...(status && { status }),
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    });
+  }
+
+  static async findUserSentShares(
+    userId: string,
+    options: {
+      status?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<PrismaShare[]> {
+    const { status, page = 1, limit = 20 } = options;
+    const skip = (page - 1) * limit;
+
+    return await prisma.share.findMany({
+      where: {
+        fromUserId: userId,
+        ...(status && { status }),
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    });
+  }
+}
