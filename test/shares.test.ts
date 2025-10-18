@@ -140,22 +140,28 @@ describe("WatchThis Sharing Service - CRUD API", () => {
       assert.equal(res.body.error.code, "MISSING_FIELDS");
     });
 
-    it("should fail when user tries to share with themselves", async () => {
+    it("should allow user to share with themselves (watch later)", async () => {
       const auth = authenticateAs(testUsers.user1);
 
       const shareData = {
         mediaId: testData.validMediaId.toString(),
         toUserId: testUsers.user1.id, // Same as authenticated user
+        message: "Watch later",
       };
 
       const res = await request(app)
         .post("/api/v1/shares")
         .set("Authorization", auth.authHeader)
         .send(shareData)
-        .expect(400);
+        .expect(201);
 
-      assert.equal(res.body.success, false);
-      assert.equal(res.body.error.code, "INVALID_SHARE");
+      assert.equal(res.body.success, true);
+      assert.ok(res.body.data);
+      assert.equal(res.body.data.mediaId, shareData.mediaId);
+      assert.equal(res.body.data.fromUserId, testUsers.user1.id);
+      assert.equal(res.body.data.toUserId, testUsers.user1.id);
+      assert.equal(res.body.data.message, "Watch later");
+      assert.equal(res.body.data.status, "pending");
     });
 
     it("should trim whitespace from message", async () => {

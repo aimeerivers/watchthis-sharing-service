@@ -36,17 +36,6 @@ export function mountApi(mountRoute: string, app: Express): void {
         });
       }
 
-      // Prevent self-sharing
-      if (fromUserId === toUserId) {
-        return res.status(400).json({
-          success: false,
-          error: {
-            code: "INVALID_SHARE",
-            message: "Cannot share with yourself",
-          },
-        });
-      }
-
       // TODO: Validate user IDs exist via user service
       // TODO: Validate media ID exists via media service
       // TODO: Check if users are friends/allowed to share
