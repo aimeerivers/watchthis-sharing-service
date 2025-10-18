@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/aimeerivers/watchthis-sharing-service/compare/v2.0.0...v2.1.0) (2025-10-18)
+
+
+### Features
+
+* Remove restriction on sharing with yourself to enable "watch later" functionality ([#22](https://github.com/aimeerivers/watchthis-sharing-service/issues/22)) ([c71da53](https://github.com/aimeerivers/watchthis-sharing-service/commit/c71da53a8b388f28136e5a847c20baf7876509f8))
+
 ## [2.0.0](https://github.com/aimeerivers/watchthis-sharing-service/compare/v1.2.5...v2.0.0) (2025-10-15)
 
 
