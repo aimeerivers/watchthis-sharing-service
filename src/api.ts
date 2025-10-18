@@ -38,7 +38,7 @@ export function mountApi(mountRoute: string, app: Express): void {
 
       // TODO: Validate user IDs exist via user service
       // TODO: Validate media ID exists via media service
-      // TODO: Check if users are friends/allowed to share
+      // TODO: Check if users are friends/allowed to share (not needed for self-shares)
 
       const share = await Share.create({
         mediaId,
