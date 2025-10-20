@@ -40,33 +40,33 @@
     "test": "NODE_ENV=test node --test dist/test/*.test.js"
   },
   "dependencies": {
-    "@prisma/client": "6.0.0",
+    "@prisma/client": "6.17.1",
     "app-root-path": "3.1.0",
-    "dotenv": "17.2.2",
+    "dotenv": "17.2.3",
     "express": "5.1.0",
     "helmet": "8.1.0",
-    "prisma": "6.0.0",
+    "prisma": "6.17.1",
     "pug": "3.0.3"
   },
   "devDependencies": {
     "@tailwindcss/forms": "0.5.10",
-    "@tailwindcss/postcss": "4.1.13",
-    "@tailwindcss/typography": "0.5.18",
+    "@tailwindcss/postcss": "4.1.14",
+    "@tailwindcss/typography": "0.5.19",
     "@types/express": "5.0.3",
-    "@types/node": "24.5.2",
+    "@types/node": "24.8.1",
     "@types/supertest": "6.0.3",
     "autoprefixer": "10.4.21",
     "concurrently": "9.2.1",
-    "dotenv-cli": "7.4.2",
-    "eslint-config-plus-prettier": "4.2.2",
+    "dotenv-cli": "7.4.4",
+    "eslint-config-plus-prettier": "4.2.3",
     "nock": "14.0.10",
     "nodemon": "3.1.10",
     "postcss": "8.5.6",
     "postcss-cli": "11.0.1",
     "postcss-minify": "1.2.0",
     "supertest": "7.1.4",
-    "tailwindcss": "4.1.13",
-    "typescript": "5.9.2"
+    "tailwindcss": "4.1.14",
+    "typescript": "5.9.3"
   },
   "prettier": "eslint-config-plus-prettier/prettier"
 }
